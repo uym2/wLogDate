@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 import logdate
 from logdate.logD_lib import logDate_with_random_init,f_wLogDate
 from dendropy import Tree
