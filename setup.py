@@ -12,7 +12,7 @@ param = {
     'license': logdate.PROGRAM_LICENSE,
     'packages': find_packages(),
     'include_package_data': True,
-    'scripts' : ['wlaunch_LogDate.py'],
+    'scripts' : ['launch_wLogDate.py'],
     'zip_safe': True,
     'install_requires': ['dendropy>=4.3.0','scipy>=1.3.1','bitsets>=0.7.15','numpy>=1.18.5'],
     'keywords': 'Phylogenetics Evolution Biology',
