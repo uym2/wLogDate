@@ -21,7 +21,7 @@ Otherwise, type
 ```
 
 # Usage
-wLogDate accepts calibration points (hard constraints on divergence times) for internal nodes, sampling times at leaf nodes, and a mixture of the two. Below we give examples for the three most common use-cases. All examples are given in folder [use_cases](use_cases) of this repository. If you installed wLogDate use Anaconda and did not clone the repo to your machine, please download the [use_cases](https://github.com/uym2/wLogDate/edit/master/use_cases) folder to your machine before trying the examples.
+wLogDate accepts calibration points (hard constraints on divergence times) for internal nodes, sampling times at leaf nodes, and a mixture of the two. Below we give examples for the three most common use-cases. All examples are given in [use_cases.zip](use_cases.zip) of this repository. If you cloned or downloaded the repository, go to the wLogDate folder and unzip ```use_cases.zip```. If you installed wLogDate using Anaconda, download [use_cases.zip](https://github.com/uym2/wLogDate/edit/master/use_cases.zip) to your machine and unzip it before trying the examples.
 
 ## Use case 1: Infer the unit ultrametric tree
 If there is no calibrations given, wLogDate will infer the unit (depth 1) ultrametric tree.
