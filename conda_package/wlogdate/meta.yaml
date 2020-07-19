@@ -1,6 +1,6 @@
 package:
   name: wlogdate
-  version: x.y.z
+  version: 1.0.0
 source:
   #path: ../../
   git_rev: master
