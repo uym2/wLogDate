@@ -82,7 +82,7 @@ Calibration points can be given in the same way as sampling times. If the tree n
 Because the input tree ```input.nwk``` does not have labels for internal nodes, we need to use LCA to specify calibration points. Here we use 4 calibration points in ```input.txt```. An internal node is identified as the LCA of 2 or more species separated by "+" and its name can be optionally specified using "=". In our example, the 4 calibration points are the LCAs of (t1, t30, t40, and t26), (t27 and t3), (t24 and t37), and (t46, t31, and t48), with two node labels "calib1" and "calib2" assigned to (t1, t30, t40, and t26) and (t24 and t37), respectively. Note that label assignments in ```input.txt``` override both the input tree's labels and automatic labeling of wLogDate.
 
 ```bash
-   cd examples/fossil_backward_time
+   cd use_cases/fossil_backward_time
    launch_wLogDate.py -i input.nwk -t input.txt -o output.nwk -b
 ```
 
