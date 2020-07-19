@@ -1,25 +1,30 @@
 # Installation
-If you have Anaconda, you can install LogDate with conda install
+If you have Anaconda, you can install wLogDate with conda install
 
 ``` bash
-   conda install -c uym2 logdate 
+   conda install -c uym2 wlogdate 
 ```  
 
 Alternatively, you can either clone the repository to your machine 
 ```bash
-   git clone https://github.com/uym2/LogDate.git
+   git clone https://github.com/uym2/wLogDate.git
 ```
-or simply download the zip file to your machine. To install, go to the LogDate folder and type
+or simply download the zip file to your machine. 
 
+To install, go to the wLogDate folder. If you have ```pip```, use
+```bash
+   pip install .
+```
+Otherwise, type
 ``` bash
   python setup.py develop
 ```
 
 # Usage
-LogDate accepts calibration points (hard constraint on divergence time) for internal nodes, sampling times at leaf nodes, and a mixture of the two. Here we give examples for the three most common use-cases:
+wLogDate accepts calibration points (hard constraints on divergence times) for internal nodes, sampling times at leaf nodes, and a mixture of the two. Below we give examples for the three most common use-cases. All examples are given in folder [use_cases](use_case).
 
 ## Use case 1: Infer the unit ultrametric tree
-If there is no calibrations given, LogDate will infer the unit (depth 1) ultrametric tree from an input tree.
+If there is no calibrations given, wLogDate will infer the unit (depth 1) ultrametric tree from an input tree.
 
 ``` bash
    launch_LogDate.py -i <INPUT_TREE> -o <OUTPUT_TREE>
