@@ -34,7 +34,7 @@ We give an example in folder [use_cases/unit_time_tree](use_cases/unit_time_tree
 
 ```bash
    cd use_cases/unit_time_tree
-   launch_wLogDate -i input.nwk -o output.nwk
+   launch_wLogDate.py -i input.nwk -o output.nwk
 ```
 The output tree ```output.nwk``` is ultrametric and has depth (root-to-tip distance) 1. The relative divergence times of the internal nodes are annotated to the tree inside the square brackets.
 
