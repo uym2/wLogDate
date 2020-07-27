@@ -8,22 +8,24 @@ If you have Anaconda, you can install wLogDate with conda install
    conda install -c uym2 wlogdate 
 ```  
 
-### From source code. 
+### From source code 
 1. Eeither 
 	* clone the repository to your machine 
-```bash
-   git clone https://github.com/uym2/wLogDate.git
-```
+
+	```bash
+	   git clone https://github.com/uym2/wLogDate.git
+	```
+
 	* or simply download [this zip file](https://github.com/uym2/wLogDate/archive/master.zip) to your machine. 
 2. To install, go to the wLogDate folder. 
 	* If you have ```pip```, use
-```bash
-   pip install .
-```
+	```bash
+	   pip install .
+	```
 	* Otherwise, type
-``` bash
-   python setup.py develop
-```
+	``` bash
+	   python setup.py develop
+	```
 
 # Usage
 wLogDate accepts calibration points (hard constraints on divergence times) for internal nodes, sampling times at leaf nodes, and a mixture of the two. Below we give examples for the three most common use-cases. All examples are given in [use_cases.zip](use_cases.zip) of this repository. If you cloned or downloaded the repository, go to the wLogDate folder and unzip ```use_cases.zip```. If you installed wLogDate using Anaconda, download [use_cases.zip](https://github.com/uym2/wLogDate/edit/master/use_cases.zip) to your machine and unzip it before trying the examples.
