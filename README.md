@@ -54,25 +54,48 @@ We give an example in folder [use_cases/unit_time_tree](use_cases/unit_time_tree
    cd use_cases/unit_time_tree
    launch_wLogDate.py -i input.nwk -o output.nwk
 ```
+
 The output tree is ```output.nwk```.
-    - It is an ultrametric tree and has depth (root-to-tip distance) 1
-    - The relative divergence times of the internal nodes are annotated on the tree inside the square brackets with attribute `t`, as in, `[t=0.095]`.
+
+* It is an ultrametric tree and has depth (root-to-tip distance) 1.
+* The relative divergence times of the internal nodes are annotated on the tree inside the square brackets with attribute `t`, as in, `[t=0.095]`.
 
 ## Use case 2: Infer the time tree from phylodynamics data
-A typical use-case in virus phylogeny is to infer the time tree from a phylogram inferred from sequences and their sampling times (i.e. calibration points given at leaf nodes). wLogDate reads the calibration points / sampling times from an input file via the `-t` option.
+A typical use-case in virus phylogeny is to infer the time tree from a phylogram inferred from sequences and their sampling times (i.e. calibration points given at leaf nodes). wLogDate reads the calibration points or sampling times from an input file via the `-t` option.
 
 ```bash
    launch_wLogDate.py -i <INPUT_TREE> -o <OUTPUT_TREE> -t <SAMPLING_TIMES>
 ```
 
 ### 2.1. Complete sampling times
-An example is given in the folder `use_cases/virus_all_samplingTime`, inside which you will find an input tree (`input.nwk`) and the input sampling times (`input.txt`). In this example, we give LogDate all the sampling times for all leaves (i.e. complete sampling times). The file `input.txt` has two columns, which are the species names and the corresponding sampling times.
+An example is given in the folder `use_cases/virus_all_samplingTime`. Starting from the base directory,
+
+```bash
+   cd use_cases/virus_all_samplingTime
+```
+
+Inside this folder you will find an input tree (`input.nwk`) and the input sampling times (`input.txt`).
+In this example, we give LogDate all the sampling times for all leaves (i.e. complete sampling times). The file `input.txt` has two columns, which are the species names and the corresponding sampling times.
+ For example, lines
+
+```
+000009  9.36668
+000010  9.36668
+000011  11.3667
+000012  11.3667
+```
+show that leaves `000009` and `000010` are sampled at time 9.36668 while nodes `000011` and `000012` are sampled at time 11.3667.
+
+Now, run:
 
 ```bash
    cd use_cases/virus_all_samplingTime
    launch_wLogDate.py -i input.nwk -o output.nwk -t input.txt
 ```
-The output tree ```output.nwk``` has branch lengths in time units and divergence times annotated on every internal nodes.
+The output tree ```output.nwk``` 
+
+* has branch lengths in time units and 
+* divergence times annotated on every internal nodes using the `[t=9.55]` notation.
 
 ### 2.2. Partial (missing) sampling times
 wLogDate allows missing sampling times for the leaves, as long as there exists at least one pair of leaves with different sampling times. The usage of wLogDate is the same as in the case of complete sampling times. An example is given in the folder `use_cases/virus_some_samplingTime`. Here we give the sampling times for 52 species out of 110 in total.
