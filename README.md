@@ -34,6 +34,14 @@ If you have Anaconda, you can install wLogDate with conda install
 	   python setup.py develop
 	```
 
+
+After installation, run:
+
+```bash
+launch_wLogDate.py -h
+```
+to see the commandline help of wLogDate.
+
 # Usage
 wLogDate accepts calibration points (hard constraints on divergence times) for internal nodes, sampling times at leaf nodes, and a mixture of the two. Below we give examples for the three most common use-cases. 
 
@@ -84,7 +92,9 @@ In this example, we give LogDate all the sampling times for all leaves (i.e. com
 000011  11.3667
 000012  11.3667
 ```
-show that leaves `000009` and `000010` are sampled at time 9.36668 while nodes `000011` and `000012` are sampled at time 11.3667.
+show that leaves `000009` and `000010` are sampled at time 9.36668 while nodes `000011` and `000012` are sampled at time 11.3667. 
+
+**Note:** These times are assumed to be forward; i.e, smaller values mean closer to the root of the tree. The top of the branch above the root is assumed to be 0.
 
 Now, run:
 
@@ -112,21 +122,55 @@ wLogDate allows the sampling times to be given in both internal nodes and at lea
    cd use_cases/virus_internal_smplTime
    launch_wLogDate.py -i input.nwk -o output.nwk -t input.txt -k
 ```
-The `-k` flag (or `--keep`) is used to announce wLogDate that the tree has already had unique labeling and to suppress the auto-label of wLogDate.
+The `-k` flag (or `--keep`) is used to inform wLogDate that the tree has already had unique labeling and to suppress the auto-labeling of internal nodes by wLogDate.
 
 ## Use case 3: Infer the time tree with calibration points given in backward time
-For calibration points obtained from fossils, the calibration points are usually specified in backward time such as "million years ago" ("mya"). For your convenience, wLogDate allows specification of backward time via the `-b` flag.
+For calibration points obtained from fossils, the calibration points are usually specified in backward time such as "million years ago" ("mya"). For these cases, wLogDate allows specification of backward time via the `-b` flag.
 
 ```bash
    launch_wLogDate.py -i <INPUT_TREE> -o <OUTPUT_TREE> -t <CALIBRATIONS> -b
 ```
-Calibration points can be given in the same way as sampling times. If the tree nodes are uniquely labeled, we can use the labels to specify the internal nodes associated with the calibration points. Alternatively, wLogDate allows the identification of a node as the LCA of a set of species and allows optional label assignment to these calibration points. We give an example in `use_cases/fossil_backward_time`.
+Calibration points can be given in the same way as sampling times. 
 
-Because the input tree ```input.nwk``` does not have labels for internal nodes, we need to use LCA to specify calibration points. Here we use 4 calibration points in ```input.txt```. An internal node is identified as the LCA of 2 or more species separated by "+" and its name can be optionally specified using "=". In our example, the 4 calibration points are the LCAs of (t1, t30, t40, and t26), (t27 and t3), (t24 and t37), and (t46, t31, and t48), with two node labels "calib1" and "calib2" assigned to (t1, t30, t40, and t26) and (t24 and t37), respectively. Note that label assignments in ```input.txt``` override both the input tree's labels and automatic labeling of wLogDate.
+* If the tree nodes are uniquely labeled, we can use the node labels to specify the internal nodes associated with the calibration points. 
+* Alternatively, wLogDate allows the identification of a node as the Least Common Ancestor (LCA) of a set of species and allows optional label assignment to these calibration points. You may know LCA by their other name: MRCA. 
+
+We give an example of the LCA specification in `use_cases/fossil_backward_time`. From the base directory, go to this example. 
 
 ```bash
    cd use_cases/fossil_backward_time
+```
+
+Because the input tree ```input.nwk``` does not have labels for internal nodes, we need to use LCA to specify calibration points. Here we use 4 calibration points in ```input.txt```: 
+
+```
+calib1=t1+t30+t40+t26 0.551
+t27+t3 0.057
+calib2=t24+t37 0.152
+t46+t31+t48 2.699
+```
+
+An internal node is identified as the LCA of 2 or more species separated by `+`. Moreover, a name for this internal node can be optionally specified using `=`. In our example, the 4 calibration points are the LCAs of `(t1, t30, t40, and t26)`, `(t27 and t3)`, `(t24 and t37)`, and `(t46, t31, and t48)`, with two node labels `calib1` and `calib2` assigned to two of these nodes. Note that label assignments in ```input.txt``` override both the input tree's labels and automatic labeling of wLogDate.
+
+```bash
    launch_wLogDate.py -i input.nwk -t input.txt -o output.nwk -b
 ```
 
-With the `-b` flag, wLogDate understands the time as backward and enforces each parent node's divergence time to be larger (i.e. "older") than those of its children. The output tree ```output.nwk``` is ultrametric, has branch lengths in time units, and has divergence times annotated onto the internal nodes in backward time. By default, the leaf nodes are set to present time (t = 0). You can adjust the leaf time using the `-f` option. The output tree has internal node labels assigned arbitrarily by wLogDate, except for the two calibration points "calib1" and "calib2" assigned by user via `input.txt`.
+With the `-b` flag, wLogDate understands the time as backward and enforces each parent node's divergence time to be larger (i.e. "older") than those of its children. 
+
+The output tree ```output.nwk``` is ultrametric, has branch lengths in time units, and has divergence times annotated onto the internal nodes in backward time. 
+
+* By default, the leaf nodes are set to present time (t = 0). You can adjust the leaf time using the `-f` option. 
+* The output tree has internal node labels assigned arbitrarily by wLogDate, except for the two calibration points "calib1" and "calib2" assigned by user via `input.txt`.
+
+
+# Other useful options
+
+The following options are useful to explore:
+
+* `-p 10` (or some other number) can be used to run the optimization problem 10 times instead of the default once, each starting from a different initial point. 
+* `-s` can be used to set the seed number, to enable reproducing results. 
+* `-l` can be used to set the length of the sequences from which the tree is inferred. Impacts the pseudocount used internally by wLogDate for super short branches.
+* `-m` to adjust the maximum number of iterations of the internal optimizer. 
+* `-z` to assign an arbitrary length to zero length branches.
+*  `-r` can be used to set the time at the root. 
