@@ -54,7 +54,9 @@ We give an example in folder [use_cases/unit_time_tree](use_cases/unit_time_tree
    cd use_cases/unit_time_tree
    launch_wLogDate.py -i input.nwk -o output.nwk
 ```
-The output tree ```output.nwk``` is ultrametric and has depth (root-to-tip distance) 1. The relative divergence times of the internal nodes are annotated to the tree inside the square brackets.
+The output tree is ```output.nwk```.
+    - It is an ultrametric tree and has depth (root-to-tip distance) 1
+    - The relative divergence times of the internal nodes are annotated on the tree inside the square brackets with attribute `t`, as in, `[t=0.095]`.
 
 ## Use case 2: Infer the time tree from phylodynamics data
 A typical use-case in virus phylogeny is to infer the time tree from a phylogram inferred from sequences and their sampling times (i.e. calibration points given at leaf nodes). wLogDate reads the calibration points / sampling times from an input file via the `-t` option.
