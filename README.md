@@ -1,21 +1,26 @@
 # Installation
+
+### Using Conda
+
 If you have Anaconda, you can install wLogDate with conda install
 
 ``` bash
    conda install -c uym2 wlogdate 
 ```  
 
-Alternatively, you can either clone the repository to your machine 
+### From source code. 
+1. Eeither 
+	* clone the repository to your machine 
 ```bash
    git clone https://github.com/uym2/wLogDate.git
 ```
-or simply download the zip file to your machine. 
-
-To install, go to the wLogDate folder. If you have ```pip```, use
+	* or simply download [this zip file](https://github.com/uym2/wLogDate/archive/master.zip) to your machine. 
+2. To install, go to the wLogDate folder. 
+	* If you have ```pip```, use
 ```bash
    pip install .
 ```
-Otherwise, type
+	* Otherwise, type
 ``` bash
    python setup.py develop
 ```
