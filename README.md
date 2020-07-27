@@ -122,7 +122,7 @@ wLogDate allows the sampling times to be given in both internal nodes and at lea
    cd use_cases/virus_internal_smplTime
    launch_wLogDate.py -i input.nwk -o output.nwk -t input.txt -k
 ```
-The `-k` flag (or `--keep`) is used to inform wLogDate that the tree has already had unique labeling and to suppress the auto-labeling of internal nodes by wLogDate.
+The `-k` flag (or `--keep`) is used to inform wLogDate that the tree already has unique internal node labels and that wLogDate should suppress the auto-labeling of internal nodes.
 
 ## Use case 3: Infer the time tree with calibration points given in backward time
 For calibration points obtained from fossils, the calibration points are usually specified in backward time such as "million years ago" ("mya"). For these cases, wLogDate allows specification of backward time via the `-b` flag.
