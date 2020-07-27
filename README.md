@@ -17,7 +17,7 @@ To install, go to the wLogDate folder. If you have ```pip```, use
 ```
 Otherwise, type
 ``` bash
-  python setup.py develop
+   python setup.py develop
 ```
 
 # Usage
@@ -27,7 +27,7 @@ wLogDate accepts calibration points (hard constraints on divergence times) for i
 If there is no calibrations given, wLogDate will infer the unit (depth 1) ultrametric tree.
 
 ``` bash
-   launch_LogDate.py -i <INPUT_TREE> -o <OUTPUT_TREE>
+   launch_wLogDate.py -i <INPUT_TREE> -o <OUTPUT_TREE>
 ```
 
 We give an example in folder [use_cases/unit_time_tree](use_cases/unit_time_tree), inside which you can find the sampled input tree `input.nwk`.
@@ -42,7 +42,7 @@ The output tree ```output.nwk``` is ultrametric and has depth (root-to-tip dista
 A typical use-case in virus phylogeny is to infer the time tree from a phylogram inferred from sequences and their sampling times (i.e. calibration points given at leaf nodes). wLogDate reads the calibration points / sampling times from an input file via the `-t` option.
 
 ```bash
-   launch_LogDate -i <INPUT_TREE> -o <OUTPUT_TREE> -t <SAMPLING_TIMES>
+   launch_wLogDate.py -i <INPUT_TREE> -o <OUTPUT_TREE> -t <SAMPLING_TIMES>
 ```
 
 ### 2.1. Complete sampling times
@@ -50,7 +50,7 @@ An example is given in the folder `use_cases/virus_all_samplingTime`, inside whi
 
 ```bash
    cd use_cases/virus_all_samplingTime
-   launch_wLogDate -i input.nwk -o output.nwk -t input.txt
+   launch_wLogDate.py -i input.nwk -o output.nwk -t input.txt
 ```
 The output tree ```output.nwk``` has branch lengths in time units and divergence times annotated on every internal nodes.
 
@@ -58,8 +58,8 @@ The output tree ```output.nwk``` has branch lengths in time units and divergence
 wLogDate allows missing sampling times for the leaves, as long as there exists at least one pair of leaves with different sampling times. The usage of wLogDate is the same as in the case of complete sampling times. An example is given in the folder `use_cases/virus_some_samplingTime`. Here we give the sampling times for 52 species out of 110 in total.
 
 ```bash
-   cd uses_cases/virus_some_samplingTime
-   launch_wLogDate -i input.nwk -o output.nwk -t input.txt
+   cd use_cases/virus_some_samplingTime/
+   launch_wLogDate.py -i input.nwk -o output.nwk -t input.txt
 ```
 
 ### 2.3. Sampling times at internal nodes
@@ -67,7 +67,7 @@ wLogDate allows the sampling times to be given in both internal nodes and at lea
 
 ```bash
    cd use_cases/virus_internal_smplTime
-   launch_wLogDate -i input.nwk -o output.nwk -t input.txt -k
+   launch_wLogDate.py -i input.nwk -o output.nwk -t input.txt -k
 ```
 The `-k` flag (or `--keep`) is used to announce wLogDate that the tree has already had unique labeling and to suppress the auto-label of wLogDate.
 
@@ -75,7 +75,7 @@ The `-k` flag (or `--keep`) is used to announce wLogDate that the tree has alrea
 For calibration points obtained from fossils, the calibration points are usually specified in backward time such as "million years ago" ("mya"). For your convenience, wLogDate allows specification of backward time via the `-b` flag.
 
 ```bash
-   launch_wLogDate -i <INPUT_TREE> -o <OUTPUT_TREE> -t <CALIBRATIONS> -b
+   launch_wLogDate.py -i <INPUT_TREE> -o <OUTPUT_TREE> -t <CALIBRATIONS> -b
 ```
 Calibration points can be given in the same way as sampling times. If the tree nodes are uniquely labeled, we can use the labels to specify the internal nodes associated with the calibration points. Alternatively, wLogDate allows the identification of a node as the LCA of a set of species and allows optional label assignment to these calibration points. We give an example in `use_cases/fossil_backward_time`.
 
