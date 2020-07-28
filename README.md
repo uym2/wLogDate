@@ -6,11 +6,11 @@ The algorithm is developed by Uyen Mai and Siavash Mirarab. The code is entirely
 
 Currently, wLogDate is available only in command-line but the usage should be relatively easy.
 
-####publication
+#### Publication
 
 The paper is currently under review and a preprint can be found [here](https://www.biorxiv.org/content/10.1101/2019.12.20.885582v3).
 
-#### contact
+#### Contact
 Please submit questions and bug reports as [issues](https://github.com/uym2/wLogDate/issues).
 
 
