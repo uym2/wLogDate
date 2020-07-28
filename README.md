@@ -1,8 +1,10 @@
 # About:
 
-wLogDate is a method for dating phylogenetic trees. Given a phylogeny and either sampling times for leaves, or calibration points for internal nodes, wLogDate outputs a "dated" tree that conforms to the sampling times or calibration points. Its optimization criterion is to reduce the variance of rate multipliers in log scale (hence the term logDate). 
+wLogDate is a method for dating phylogenetic trees. Given a phylogeny and either sampling times for leaves, or calibration points for internal nodes, wLogDate outputs a "dated" tree that conforms to the sampling times or calibration points. It can also work with no sampling time or calibration points where it would simply turn the tree into ultrametric, fixing its height to a given value. Its optimization criterion is to reduce the variance of rate multipliers in log scale (hence the term logDate). 
 
 The algorithm is developed by Uyen Mai and Siavash Mirarab. The code is entirely developed by Uyen Mai. 
+
+Currently, wLogDate is available only in command-line but the usage should be relatively easy.
 
 ####publication
 
@@ -19,7 +21,9 @@ Please submit questions and bug reports as [issues](https://github.com/uym2/wLog
 You need to have:
 
 * Python >= 3.6
-* Either [Anaconda](https://www.anaconda.com/), [pip](https://pypi.org/project/pip/), or [setuptools](https://pypi.org/project/setuptools/). Modern python installations have  these already installed. 
+* [Anaconda](https://www.anaconda.com/) would make the installation slightly easier. But [pip](https://pypi.org/project/pip/) (already installed with Python 3 >=3.4) would also work. 
+
+We have tested wLogDate on Linux and MAC, but it should also work fine on Windows. 
 
 ### Intsall using Conda
 
@@ -29,8 +33,8 @@ If you have Anaconda, you can install wLogDate with conda install
    conda install -c uym2 wlogdate 
 ```  
 
-### Install rom source code 
-1. Download the code.  
+### Install from source code (pip)
+1. Download the source code.  
 	* Either clone the repository to your machine 
 
 	```bash
