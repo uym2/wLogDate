@@ -1,3 +1,17 @@
+# About:
+
+wLogDate is a method for dating phylogenetic trees. Given a phylogeny and either sampling times for leaves, or calibration points for internal nodes, wLogDate outputs a "dated" tree that conforms to the sampling times or calibration points. Its optimization criterion is to reduce the variance of rate multipliers in log scale (hence the term logDate). 
+
+The algorithm is developed by Uyen Mai and Siavash Mirarab. The code is entirely developed by Uyen Mai. 
+
+####publication
+
+The paper is currently under review and a preprint can be found [here](https://www.biorxiv.org/content/10.1101/2019.12.20.885582v3).
+
+#### contact
+Please submit questions and bug reports as [issues](https://github.com/uym2/wLogDate/issues).
+
+
 # Installation
 
 ### Prerequisites:
