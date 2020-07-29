@@ -2,7 +2,6 @@ package:
   name: wlogdate
   version: 1.0.0
 source:
-  #path: ../../
   git_rev: master
   git_url: https://github.com/uym2/wLogDate.git
 requirements:
@@ -15,8 +14,10 @@ requirements:
     - numpy 
     
   run:
-    - python
+    - python >= 3.7.3
     - numpy
+    - dendropy == 4.3.0
+    - scipy == 1.3.1
 
 test:
   imports:
