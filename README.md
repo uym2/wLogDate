@@ -101,7 +101,14 @@ An example is given in the folder `use_cases/virus_all_samplingTime`. Starting f
 ```
 
 Inside this folder you will find an input tree (`input.nwk`) and the input sampling times (`input.txt`).
-In this example, we give LogDate all the sampling times for all leaves (i.e. complete sampling times). The file `input.txt` has two columns, which are the species names and the corresponding sampling times.
+In this example, we give LogDate all the sampling times for all leaves (i.e. complete sampling times). 
+
+### Sampling time / calibration time file 
+
+* The sampling time file (`input.txt`) is a tab-delimited file, with one time per line
+* It must have two columns: the species names and the corresponding sampling times.
+
+
  For example, lines
 
 ```
