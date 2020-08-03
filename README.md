@@ -194,8 +194,8 @@ The output tree ```output.nwk``` is ultrametric, has branch lengths in time unit
 The following options are useful to explore:
 
 * `-p 10` (or some other number) can be used to run the optimization problem 10 times instead of the default once, each starting from a different initial point. 
-* `-s` can be used to set the seed number, to enable reproducing results. 
+* `-s` can be used to set the seed number, to enable reproducible results. 
 * `-l` can be used to set the length of the sequences from which the tree is inferred. Impacts the pseudocount used internally by wLogDate for super short branches.
 * `-m` to adjust the maximum number of iterations of the internal optimizer. 
-* `-z` to assign an arbitrary length to zero length branches.
-*  `-r` can be used to set the time at the root. 
+* `-z` to assign a value to zero length branches.
+* `-r` and `-f` can be used to set the time at the root and the leaves. 
