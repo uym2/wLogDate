@@ -1,4 +1,4 @@
-# About:
+# About
 
 wLogDate is a method for dating phylogenetic trees. Given a phylogeny and either sampling times for leaves or calibration points for internal nodes, wLogDate outputs a "dated" tree that conforms to the sampling times or calibration points. It can also work with no sampling time or calibration points where it would simply turn the tree into ultrametric, fixing its height to a given value. Its optimization criterion is to minimize the variance of the mutation rates in log scale (hence the term logDate). 
 
