@@ -4,8 +4,7 @@ wLogDate is a method for dating phylogenetic trees. Given a phylogeny and either
 
 The algorithm is developed by Uyen Mai and Siavash Mirarab. The code is entirely developed by Uyen Mai. 
 
-wLogDate is distributed only in command-line but the installation and usage are relatively simple. 
-We also provide a [Galaxy web-interface](http://toranj.ucsd.edu:8080) where the user can run wLogDate in an interactive mode.
+wLogDate is distributed in command-line only but the installation and usage are relatively simple. The command-line mode makes the program flexible to be pipelined with other toolsets to create a larger workflow. However, if your prefer an interactive mode, you can checkout our [Galaxy web-interface](http://toranj.ucsd.edu:8080) where you can run wLogDate in an interactive mode on the web.
 
 #### Publication
 
@@ -26,7 +25,7 @@ You need to have:
 
 We have tested wLogDate on Linux and MAC, but it should also work fine on Windows. 
 
-### Intsall using Conda
+### Install using Conda
 
 If you have Anaconda, you can install wLogDate with conda install
 
