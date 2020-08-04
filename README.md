@@ -6,7 +6,7 @@ The algorithm is developed by Uyen Mai and Siavash Mirarab. The code is entirely
 
 wLogDate is distributed in command-line only but the installation and usage are relatively simple. 
 The command-line mode makes the program flexible to be pipelined with other toolsets to create a larger workflow. 
-However, if your prefer an interactive mode, you can checkout our [Galaxy web-interface](http://www.wlogdate.com/galaxy) where you can run wLogDate on the web with GUI without any installation.
+However, if your prefer an interactive mode, you can checkout our [Galaxy web-interface](http://www.wlogdate.com/) where you can run wLogDate on the web with GUI without any installation.
 
 #### Publication
 
