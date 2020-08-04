@@ -4,7 +4,9 @@ wLogDate is a method for dating phylogenetic trees. Given a phylogeny and either
 
 The algorithm is developed by Uyen Mai and Siavash Mirarab. The code is entirely developed by Uyen Mai. 
 
-wLogDate is distributed in command-line only but the installation and usage are relatively simple. The command-line mode makes the program flexible to be pipelined with other toolsets to create a larger workflow. However, if your prefer an interactive mode, you can checkout our [Galaxy web-interface](http://toranj.ucsd.edu:8080) where you can run wLogDate in an interactive mode on the web.
+wLogDate is distributed in command-line only but the installation and usage are relatively simple. 
+The command-line mode makes the program flexible to be pipelined with other toolsets to create a larger workflow. 
+However, if your prefer an interactive mode, you can checkout our [Galaxy web-interface](http://www.wlogdate.com/galaxy) where you can run wLogDate on the web with GUI without any installation.
 
 #### Publication
 
