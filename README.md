@@ -16,7 +16,13 @@ The paper is currently under review and a preprint can be found [here](https://w
 Please submit questions and bug reports as [issues](https://github.com/uym2/wLogDate/issues).
 
 
-# Installation
+# Installation and Usage
+
+## Web-based GUI
+
+If you want to run just a couple of jobs,you can run them on our server with a Galaxy-based user interface at http://wlogdate.com/
+
+## Installation on your machine
 
 ### Prerequisites:
 
