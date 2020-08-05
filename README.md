@@ -20,7 +20,7 @@ Please submit questions and bug reports as [issues](https://github.com/uym2/wLog
 
 ## Web-based GUI
 
-If you want to run just a couple of jobs,you can run them on our server with a Galaxy-based user interface at http://wlogdate.com/
+A Galaxy-based web server with graphical user interface is available at http://wlogdate.com/
 
 ## Installation on your machine
 
