@@ -2,11 +2,7 @@
 
 wLogDate is a method for dating phylogenetic trees. Given a phylogeny and either sampling times for leaves or calibration points for internal nodes, wLogDate outputs a "dated" tree that conforms to the sampling times or calibration points. It can also work with no sampling time or calibration points where it would simply turn the tree into ultrametric, fixing its height to a given value. Its optimization criterion is to minimize the variance of the mutation rates in log scale (hence the term logDate). 
 
-The algorithm is developed by Uyen Mai and Siavash Mirarab. The code is entirely developed by Uyen Mai. 
-
-wLogDate is distributed in command-line only but the installation and usage are relatively simple. 
-The command-line mode makes the program flexible to be pipelined with other toolsets to create a larger workflow. 
-However, if your prefer an interactive mode, you can checkout our [Galaxy web-interface](http://www.wlogdate.com/) where you can run wLogDate on the web with GUI without any installation.
+The algorithm is developed by Uyen Mai and Siavash Mirarab. The code is developed by Uyen Mai. 
 
 #### Publication
 
@@ -35,13 +31,27 @@ We have tested wLogDate on Linux and MAC, but it should also work fine on Window
 
 ### Install using Conda
 
-If you have Anaconda, you can install wLogDate with conda install
+First, add `bioconda` and `conda-forge` to your active channels.
+
+```bash
+   conda config --add channels conda-forge
+   conda config --add channels bioconda
+```
+
+Now use `conda install` to install wLogDate
 
 ``` bash
    conda install -c uym2 wlogdate 
 ```  
 
-### Install from source code (pip)
+### Install using Pip
+wLogDate is available on the Python Package Index PyPI. To install, use `pip` as follow
+
+``` bash
+   python3 -m pip install wlogdate 
+```
+
+### Install from source code
 1. Download the source code.  
 	* Either clone the repository to your machine 
 
@@ -53,13 +63,12 @@ If you have Anaconda, you can install wLogDate with conda install
 2. To install, go to the wLogDate folder. 
 	* If you have ```pip```, use
 	```bash
-	   pip install .
+	   python3 -m pip install .
 	```
 	* Otherwise, type
 	``` bash
-	   python setup.py develop
+	   python3 setup.py install
 	```
-
 
 After installation, run:
 
@@ -73,10 +82,10 @@ wLogDate accepts calibration points (hard constraints on divergence times) for i
 
 * All examples are given in [use_cases.zip](use_cases.zip) of this repository. 
 	* If you cloned or downloaded the repository, go to the wLogDate folder and ```unzip use_cases.zip```. 
-	* If you installed wLogDate using Anaconda, download [use_cases.zip](https://github.com/uym2/wLogDate/edit/master/use_cases.zip) to your machine and unzip it before trying the examples.
+	* If you installed wLogDate using Anaconda or PyPI, download [use_cases.zip](https://github.com/uym2/wLogDate/edit/master/use_cases.zip) to your machine and unzip it before trying the examples.
 
 ## Use case 1: Infer the unit ultrametric tree
-If there is no calibrations given, wLogDate will infer the unit (depth 1) ultrametric tree.
+If there is no calibration given, wLogDate will infer the unit (depth 1) ultrametric tree.
 
 ``` bash
    launch_wLogDate.py -i <INPUT_TREE> -o <OUTPUT_TREE>
@@ -109,11 +118,11 @@ An example is given in the folder `use_cases/virus_all_samplingTime`. Starting f
 ```
 
 Inside this folder you will find an input tree (`input.nwk`) and the input sampling times (`input.txt`).
-In this example, we give LogDate all the sampling times for all leaves (i.e. complete sampling times). 
+In this example, we give wLogDate all the sampling times for all leaves (i.e. complete sampling times). 
 
 ### Sampling time / calibration time file 
 
-* The sampling time file (`input.txt`) is a tab-delimited file, with one time per line
+* The sampling time file (`input.txt`) is a tab-delimited file, with one pair of species-time per line
 * It must have two columns: the species names and the corresponding sampling times.
 
 
