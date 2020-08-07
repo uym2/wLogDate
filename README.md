@@ -12,7 +12,7 @@ The paper is currently under review and a preprint can be found [here](https://w
 Please submit questions and bug reports as [issues](https://github.com/uym2/wLogDate/issues).
 
 
-# Installation and Usage
+# Installation
 
 ## Web-based GUI
 
