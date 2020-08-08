@@ -87,7 +87,7 @@ wLogDate accepts calibration points (hard constraints on divergence times) for i
 	* If you cloned or downloaded the repository, go to the wLogDate folder and ```unzip use_cases.zip```. 
 	* If you installed wLogDate using Anaconda or PyPI, download [use_cases.zip](https://github.com/uym2/wLogDate/edit/master/use_cases.zip) to your machine and unzip it before trying the examples.
 	
-Note: the examples below assume you are using Linux or MacOS. For Windows users who used the installation wizard, change ```launch_wLogDate.py``` to ```launch_wLogDate``` in all commands below.
+Note: the examples below assume you are using Linux or MacOS. For Windows users who installed wLogDate using the installation wizard, change ```launch_wLogDate.py``` to ```launch_wLogDate``` in all commands in the examples below.
 
 ## Use case 1: Infer the unit ultrametric tree
 If there is no calibration given, wLogDate will infer the unit (depth 1) ultrametric tree.
