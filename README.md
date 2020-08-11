@@ -47,7 +47,7 @@ Now use `conda install` to install wLogDate
 ```  
 
 ### Install using Pip
-wLogDate is available on the Python Package Index PyPI. To install, use `pip` as follow
+wLogDate is available on the Python Package Index (PyPI). To install, use `pip` as follow
 
 ``` bash
    python3 -m pip install wlogdate 
