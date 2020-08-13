@@ -20,7 +20,7 @@ A Galaxy-based web server with graphical user interface is available at http://w
 
 ## For Windows users
 We provide executables for Windows users. You can download [this file](https://github.com/uym2/wLogDate/blob/master/v1.0.0/wldsetup-1.0.0.exe) and follow the install wizard. 
-After installation, open the cmd and run ```launch_wLogDate -h``` to see the commandline help of wLogDate.
+After installation, restart your computer. Then open the cmd and run ```launch_wLogDate -h``` to see the commandline help of wLogDate.
 
 ## For MacOS and Linux users
 You can install wLogDate using Anaconda, Pip, or from source code.
