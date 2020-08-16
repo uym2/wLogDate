@@ -16,6 +16,7 @@ def main():
     parser.add_argument("-r","--rootTime",required=False,help="Divergence time at root. Will be overrided by -t if conflict occurs. Default: if -t is used, set root time to None. Otherwise, set root time to 1 if -b is used else 0.")
     parser.add_argument("-f","--leafTime",required=False,help="Divergence time at leaves. Will be overrided by -t whenever conflicts occur. To be used with either -r or -b to produce ultrametric tree. Default: if -b is off, set leaf times to None if -t is used else 1. If -b is on, set leaf times to 0 and allow -t to override it.")
     parser.add_argument("-b","--backward",action='store_true',help="Use backward time and enforce ultrametricity. This option is useful for fossil calibrations with present-time sequences. Can be used with -t, -r, and -f as follows: " + "1. Without -t, -r, and -f: assign all leaf times to 0 (i.e. present time) and root time to 1 (i.e. 1 unit of time backward)" + " 2. Without -t, with -r tR and -f tL: requires tR > tL" + " 3. With -t and without -f (with/without -r): assign all leaf times to 0 (i.e. present time) to enforce ultrametricity. If -r is used, root time will be fixed to that number, otherwise, root time will be inferred." + " 4. With -t and -f (with/without -r): -t will override -f (and -r) whenever conflicts occur. If -t enforces hetorogeneous sampling times at (some) leaves, the ultrametricity enforcement will be broken and the output tree can be non-ultrametric. " + "Default: NO")  
+    parser.add_argument("-d","--asDate",action='store_true',help="Read and write divergence times as date format (%Y-%m-%d). If it is used, the output tree has branch lengths in days and divergence times shown as date (%Y-%m-%d). Note: this option cannot be used with -b and will override -b if both are used. Default: FALSE")
     parser.add_argument("-o","--output",required=True,help="Output trees")
     parser.add_argument("-V","--verbose",action='store_true',help="Show verbose message. Default: NO")
     parser.add_argument("-v","--version", action='version', version=logdate.PROGRAM_NAME + " " + logdate.PROGRAM_VERSION,help="Show wLogDate version and exit")
@@ -51,11 +52,12 @@ def main():
     verbose = args["verbose"]
     do_label = not args["keeplabel"]
     bw_time = args["backward"]
+    as_date = args["asDate"]
 
     if args["rootTime"] is None:
         tR = None if sampling_time else ( 1 if bw_time else 0 )
     else:
-        tR = float(args["rootTime"])
+        tR = float(args["rootTime"]) if not as_date else date_to_days(args["rootTime"])
         
     if args["leafTime"] is None:
         if sampling_time is not None:
@@ -66,7 +68,7 @@ def main():
         else:
             tL = 0 if bw_time else 1            
     else:
-        tL = float(args["leafTime"])            
+        tL = float(args["leafTime"]) if not as_date else date_to_days(args["leafTime"])            
 
     with open(args["input"],'r') as fin:
         tree_strings = fin.readlines()
@@ -88,7 +90,7 @@ def main():
             if node is not tree.seed_node and node.edge_length == 0:
                 node.edge_length = zero_len
         # dating        
-        mu,f,x,s_tree,t_tree = logDate_with_random_init(tree,f_obj,sampling_time,bw_time=bw_time,root_time=tR,leaf_time=tL,nrep=nrep,min_nleaf=10,maxIter=maxIter,seed=randseed,pseudo=pseudo,seqLen=seqLen,verbose=verbose)
+        mu,f,x,s_tree,t_tree = logDate_with_random_init(tree,f_obj,sampling_time,bw_time=bw_time,as_date=as_date,root_time=tR,leaf_time=tL,nrep=nrep,min_nleaf=10,maxIter=maxIter,seed=randseed,pseudo=pseudo,seqLen=seqLen,verbose=verbose)
         tree_as_newick(t_tree,outfile=args["output"],append=True)
         print("Clock rate: " + str(mu))
         print("Log score: " + str(f))

@@ -9,6 +9,7 @@ from shutil import copyfile, rmtree
 from os import remove
 from copy import deepcopy
 from logdate.fixed_init_lib import random_date_init
+from logdate.util_lib import date_to_days, days_to_date
 #from logdate.init_lib_old import random_date_init
 import platform
 from scipy.sparse import diags
@@ -36,8 +37,53 @@ def f_wLogDate(pseudo=0,seqLen=1000):
 
     return f,g,h
 
-
 def setup_constraint(tree,smpl_times):
+    active_set = [node for node in tree.postorder_node_iter() if node.is_active]
+    N = len(active_set)-1
+    cons_eq = []
+    
+    idx = 0
+    b = [1.]*N
+    
+    for node in active_set:
+        node.idx = idx
+        idx += 1
+        new_constraint = None        
+        lb = node.taxon.label if node.is_leaf() else node.label
+        C = [ c for c in node.child_node_iter() if c.is_active ]
+        
+        if lb in smpl_times:
+            node.height = 0
+            new_constraint = [0.0]*(N+2)
+            new_constraint[N] = -smpl_times[lb]            
+            new_constraint[N+1] = 1           
+            for c in C:
+                a = c.constraint[:-2] + [smpl_times[lb]+c.constraint[-2]] + [0]
+                cons_eq.append(a)
+        elif not node.as_leaf:  
+            c0 = C[0]
+            min_height = c0.height      
+            closest_child = c0
+            for c in C[1:]:
+                # add new constraint
+                a = [ (c.constraint[i] - c0.constraint[i]) for i in range(N+2) ]
+                cons_eq.append(a)
+                # compute height
+                if c.height < min_height:
+                    min_height = c.height
+                    closest_child = c
+            node.height = min_height + 1
+            new_constraint = closest_child.constraint
+        
+        node.constraint = new_constraint
+        if node is not tree.seed_node and node.constraint is not None:    
+            node.constraint[node.idx] = node.edge_length
+            b[node.idx] = node.edge_length
+    
+    return cons_eq,b
+                    
+
+def setup_constraint_old(tree,smpl_times):
     active_set = [node for node in tree.postorder_node_iter() if node.is_active]
     N = len(active_set)-1
     cons_eq = []
@@ -82,14 +128,14 @@ def setup_constraint(tree,smpl_times):
                     cons_eq.append(a2)
             elif f1:
                 if not f0:
-                    node.height = c1.height
+                    node.height = c1.height + 1
                     new_constraint = c1.constraint
                 else:    
                     a1 = c1.constraint[:-2] + [smpl_times[lb]+c1.constraint[-2]] + [0]
                     cons_eq.append(a1)
             elif f2:
                 if not f0:
-                    node.height = c2.height
+                    node.height = c2.height + 1
                     new_constraint = c2.constraint        
                 else:        
                     a2 = c2.constraint[:-2] + [smpl_times[lb]+c2.constraint[-2]] + [0]
@@ -127,7 +173,8 @@ def logIt(tree,f_obj,cons_eq,b,x0=None,maxIter=MAX_ITER,pseudo=0,seqLen=1000,ver
     
     return mu,fx,x_opt  
 
-def setup_smpl_time(tree,sampling_time=None,bw_time=False,root_time=0,leaf_time=1):
+def setup_smpl_time(tree,sampling_time=None,bw_time=False,as_date=False,root_time=0,leaf_time=1):
+# Note: if as_date is True, bw_time will be ignored 
     smpl_times = {}   
     if root_time is not None: 
         smpl_times[tree.seed_node.label] = root_time if not bw_time else -root_time
@@ -153,7 +200,10 @@ def setup_smpl_time(tree,sampling_time=None,bw_time=False,root_time=0,leaf_time=
                 name = []
                 q = spl[0]    
             q = q.split('+')
-            t = float(t) if not bw_time else -float(t)
+            if as_date:
+                t = date_to_days(t)
+            else:    
+                t = float(t) if not bw_time else -float(t)
             queries.append(q)
             times.append(t)
             names.append(name)
@@ -189,8 +239,8 @@ def random_timetree(tree,sampling_time,nrep,seed=None,root_age=None,leaf_age=Non
         fout.write(t_tree.as_string("newick"))
     
 
-def logDate_with_random_init(tree,f_obj,sampling_time=None,bw_time=False,root_time=0,leaf_time=1,nrep=1,min_nleaf=3,maxIter=MAX_ITER,seed=None,pseudo=0,seqLen=1000,verbose=False):
-    smpl_times = setup_smpl_time(tree,sampling_time=sampling_time,bw_time=bw_time,root_time=root_time,leaf_time=leaf_time)    
+def logDate_with_random_init(tree,f_obj,sampling_time=None,bw_time=False,as_date=False,root_time=0,leaf_time=1,nrep=1,min_nleaf=3,maxIter=MAX_ITER,seed=None,pseudo=0,seqLen=1000,verbose=False):
+    smpl_times = setup_smpl_time(tree,sampling_time=sampling_time,bw_time=bw_time,as_date=as_date,root_time=root_time,leaf_time=leaf_time)    
     X,seed,T0 = random_date_init(tree,smpl_times,nrep,min_nleaf=min_nleaf,seed=seed)
     
     print("Finished initialization with random seed " + str(seed))
@@ -212,7 +262,7 @@ def logDate_with_random_init(tree,f_obj,sampling_time=None,bw_time=False,root_ti
             f_min = f
             x_best = x
             s_tree,t_tree = scale_tree(tree,x_best)
-            compute_divergence_time(t_tree,smpl_times,bw_time=bw_time)
+            compute_divergence_time(t_tree,smpl_times,bw_time=bw_time,as_date=as_date)
             print("Found a better log-scored configuration")
             print("New mutation rate: " + str(x_best[-2]))
             print("New log score: " + str(f_min))
@@ -408,7 +458,7 @@ def scale_tree(tree,x):
 
     return s_tree,t_tree    
     
-def compute_divergence_time(tree,sampling_time,bw_time=False):
+def compute_divergence_time(tree,sampling_time,bw_time=False,as_date=False):
 # compute and place the divergence time onto the node label of the tree
 # must have at least one sampling time. Assumming the tree branches have been
 # converted to time unit and are consistent with the given sampling_time
@@ -453,7 +503,11 @@ def compute_divergence_time(tree,sampling_time,bw_time=False):
     # place the divergence time onto the label
     for node in tree.postorder_node_iter():                
         lb = node.taxon.label if node.is_leaf() else node.label
-        assert node.time is not None, "Failed to compute divergence time for node " + lb 
-        lb += "[t=" + (str(node.time) if not bw_time else str(-node.time)) + "]" 
+        assert node.time is not None, "Failed to compute divergence time for node " + lb
+        if as_date:
+            divTime = days_to_date(node.time)
+        else:
+            divTime = str(node.time) if not bw_time else str(-node.time)     
+        lb += "[t=" + divTime + "]" 
         if not node.is_leaf():
             node.label = lb            
