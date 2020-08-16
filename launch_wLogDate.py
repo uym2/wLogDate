@@ -6,7 +6,7 @@ from dendropy import Tree
 from os import remove,path
 from logdate.tree_lib import tree_as_newick
 import argparse
-from sys import argv
+from sys import argv,exit
 
 def main():
     parser = argparse.ArgumentParser()

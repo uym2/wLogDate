@@ -12,29 +12,27 @@ The paper is currently under review and a preprint can be found [here](https://w
 Please submit questions and bug reports as [issues](https://github.com/uym2/wLogDate/issues).
 
 
-# Installation
-
-## Web-based GUI
+# Web-based GUI
 
 A Galaxy-based web server with graphical user interface is available at http://wlogdate.com/
 
-## Installation on your machine
+# Installation on your machine
 
-### For Windows users
-We provided executables for Windows users. You can download [this file](https://github.com/uym2/wLogDate/blob/master/v1.0.0/wldsetup-1.0.0.exe) and follow the install wizard. 
-After installation, open the cmd and run ```launch_wLogDate -h``` to see the commandline help of wLogDate.
+## For Windows users
+We provide executables for Windows users. You can download [this file](https://github.com/uym2/wLogDate/blob/master/v1.0.0/wldsetup-1.0.0.exe) and follow the install wizard. 
+After installation, restart your computer. Then open the cmd and run ```launch_wLogDate -h``` to see the commandline help of wLogDate.
 
-### For MacOS and Linux users
+## For MacOS and Linux users
 You can install wLogDate using Anaconda, Pip, or from source code.
 
-#### Prerequisites:
+### Prerequisites:
 
 You need to have:
 
 * Python >= 3.6
 * [Anaconda](https://www.anaconda.com/) would make the installation slightly easier. But [pip](https://pypi.org/project/pip/) (already installed with Python 3 >=3.4) would also work. 
 
-#### Install using Conda
+### Install using Conda
 First, add `bioconda` and `conda-forge` to your active channels.
 
 ```bash
@@ -48,14 +46,14 @@ Now use `conda install` to install wLogDate
    conda install -c uym2 wlogdate 
 ```  
 
-#### Install using Pip
-wLogDate is available on the Python Package Index PyPI. To install, use `pip` as follow
+### Install using Pip
+wLogDate is available on the Python Package Index (PyPI). To install, use `pip` as follow
 
 ``` bash
    python3 -m pip install wlogdate 
 ```
 
-#### Install from source code
+### Install from source code
 1. Download the source code.  
 	* Either clone the repository to your machine 
 
@@ -87,7 +85,7 @@ wLogDate accepts calibration points (hard constraints on divergence times) for i
 	* If you cloned or downloaded the repository, go to the wLogDate folder and ```unzip use_cases.zip```. 
 	* If you installed wLogDate using Anaconda or PyPI, download [use_cases.zip](https://github.com/uym2/wLogDate/edit/master/use_cases.zip) to your machine and unzip it before trying the examples.
 	
-Note: the examples below assume you are using Linux or MacOS. For Windows users who used the installation wizard, change ```launch_wLogDate.py``` to ```launch_wLogDate``` in all commands below.
+Note: the examples below assume you are using Linux or MacOS. For Windows users who installed wLogDate using the installation wizard, change ```launch_wLogDate.py``` to ```launch_wLogDate``` in all commands in the examples below.
 
 ## Use case 1: Infer the unit ultrametric tree
 If there is no calibration given, wLogDate will infer the unit (depth 1) ultrametric tree.
