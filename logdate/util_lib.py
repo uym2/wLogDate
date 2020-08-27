@@ -1,17 +1,17 @@
 from math import log
 from datetime import datetime,timedelta
 
-# convert date (YYYY-MM-DD or YYYY-MM) to days since Jan 1, 0001
+# convert date (YYYY-MM-DD or YYYY-MM) to days since Jan 1, 2019
 def date_to_days(sample_time):
     try:
         sample_time = datetime.strptime(sample_time, '%Y-%m-%d')
     except:
         sample_time = datetime.strptime(sample_time, '%Y-%m')
-    return (sample_time - datetime(1,1,1)).days # days since Jan 1, 0001
+    return (sample_time - datetime(2019,1,1)).days # days since Jan 1, 2019
 
-# convert days since Jan 1, 0001 to date (YYYY-MM-DD)
+# convert days since Jan 1, 2019 to date (YYYY-MM-DD)
 def days_to_date(days):
-    return (datetime(1,1,1) + timedelta(days=days)).strftime('%Y-%m-%d')
+    return (datetime(2019,1,1) + timedelta(days=days)).strftime('%Y-%m-%d')
 
 def minVar_bisect(L):
 # cut a list L into two sets L1, L2 such that

@@ -210,6 +210,8 @@ def setup_smpl_time(tree,sampling_time=None,bw_time=False,as_date=False,root_tim
     calibs = find_LCAs(tree,queries) 
     nodeIdx = 0
     for node,time,name in zip(calibs,times,names):
+        if node is None:
+            continue
         if name:
             if node.is_leaf():
                 node.taxon.label = name
@@ -494,7 +496,9 @@ def compute_divergence_time(tree,sampling_time,bw_time=False,as_date=False):
             if c.time is not None:
                 t1 = c.time - c.edge_length
                 t = t1 if t is None else t
-                assert abs(t-t1) < EPSILON_t, "Inconsistent divergence time computed for node " + lb
+                if abs(t-t1) > EPSILON_t:
+                    print("WARNING: Inconsistent divergence time computed for node " + lb + ". Violate by " + str(abs(t-t1)))
+                #assert abs(t-t1) < EPSILON_t, "Inconsistent divergence time computed for node " + lb
             else:
                 stk.append(c)
         node.time = t

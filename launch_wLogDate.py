@@ -26,7 +26,7 @@ def main():
     parser.add_argument("-l","--seqLen",required=False,help="The length of the sequences. Default: 1000")
     parser.add_argument("-m","--maxIter",required=False,help="The maximum number of iterations for optimization. Default: 50000")
     parser.add_argument("-u","--addpseudo",required=False,help="Add pseudo count for per-branch weighting. Default: 0.01")
-    parser.add_argument("-z","--zero",required=False,help="Set zero-length branches (if any) to this number, because the numerical solver cannot process zero-length branches. Default: 1e-10")
+    parser.add_argument("-z","--zero",required=False,help="All branches shorter than this number will be set to this number to avoid underflow. Default: 1e-10")
     
     if len(argv) == 1:
         parser.print_help()
@@ -87,8 +87,8 @@ def main():
                     nodeIdx += 1
         # handle zero-length branches
         for node in tree.preorder_node_iter():            
-            if node is not tree.seed_node and node.edge_length == 0:
-                node.edge_length = zero_len
+            if node is not tree.seed_node:
+                node.edge_length = max(node.edge_length,zero_len)
         # dating        
         mu,f,x,s_tree,t_tree = logDate_with_random_init(tree,f_obj,sampling_time,bw_time=bw_time,as_date=as_date,root_time=tR,leaf_time=tL,nrep=nrep,min_nleaf=10,maxIter=maxIter,seed=randseed,pseudo=pseudo,seqLen=seqLen,verbose=verbose)
         tree_as_newick(t_tree,outfile=args["output"],append=True)

@@ -47,8 +47,6 @@ def find_LCAs(myTree,myQueries):
         return t                          
 
     def query_segment_tree(t,q,E,F,H):
-        L = min(F[a] for a in q)
-        R = max(F[a] for a in q)
         def __query__(node,b,e,L,R):
             if (R < b or L > e):
                 return None
@@ -63,7 +61,20 @@ def find_LCAs(myTree,myQueries):
                 return left
             return left if H[left] < H[right] else right        
 
-        return __query__(1,0,len(E)-1,L,R)
+        L = None
+        R = None
+        for a in q:
+            if a in F:
+                L = min(F[a],L) if L is not None else F[a]
+                R = max(F[a],R) if R is not None else F[a]
+            else:
+                print("WARNING: ignored calibration for taxon " + a + " which is not found in the input tree")
+        try:
+            lca = __query__(1,0,len(E)-1,L,R)
+        except:
+            print("WARNING: failed to find lca for " + str(q))
+            lca = None    
+        return lca    
 
     E,F,H = euler_tour()
     t = min_segment_tree(E,H)
