@@ -8,7 +8,7 @@ The algorithm is developed by Uyen Mai and Siavash Mirarab. The code is develope
 
 Mai, Uyen, and Siavash Mirarab. “Log Transformation Improves Dating of Phylogenies.” Molecular Biology and Evolution, in press 2020
 
-	* Abstract appeared at RECOMB 2020
+* Abstract appeared at RECOMB 2020
 
 
 #### Contact
