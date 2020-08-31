@@ -7,6 +7,7 @@ from os import remove,path
 from logdate.tree_lib import tree_as_newick
 import argparse
 from sys import argv,exit
+import logging
 
 def main():
     parser = argparse.ArgumentParser()
@@ -34,8 +35,8 @@ def main():
     
     args = vars(parser.parse_args())
     
-    print("Launching " + logdate.PROGRAM_NAME + " version " + logdate.PROGRAM_VERSION)
-    print(logdate.PROGRAM_NAME + " was called as follow: " + " ".join(argv))
+    logging.info("Launching " + logdate.PROGRAM_NAME + " version " + logdate.PROGRAM_VERSION)
+    logging.info(logdate.PROGRAM_NAME + " was called as follow: " + " ".join(argv))
 
 
     args = vars(parser.parse_args())
@@ -92,8 +93,8 @@ def main():
         # dating        
         mu,f,x,s_tree,t_tree = logDate_with_random_init(tree,f_obj,sampling_time,bw_time=bw_time,as_date=as_date,root_time=tR,leaf_time=tL,nrep=nrep,min_nleaf=10,maxIter=maxIter,seed=randseed,pseudo=pseudo,seqLen=seqLen,verbose=verbose)
         tree_as_newick(t_tree,outfile=args["output"],append=True)
-        print("Clock rate: " + str(mu))
-        print("Log score: " + str(f))
+        logging.info("Clock rate: " + str(mu))
+        logging.info("Log score: " + str(f))
 
 if __name__ == "__main__":
     main()

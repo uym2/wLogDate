@@ -1,5 +1,6 @@
 import sys
 from dendropy import Tree
+import logging
 
 
 def prune_node(T,node):
@@ -37,9 +38,9 @@ def report_taxa(tree_file,scheme='newick',listing=True,counting=True):
 	a_tree.read_from_path(tree_file,scheme)
 	if listing:
 		for leaf in a_tree.leaf_nodes():
-			print(leaf.taxon.label)
+			logging.info(leaf.taxon.label)
 	if counting:
-		print('Taxa #: ' + str(len(a_tree.leaf_nodes())))
+		logging.info('Taxa #: ' + str(len(a_tree.leaf_nodes())))
 
 def tree_as_newick(a_tree,outfile=None,append=False):
 # dendropy's method to write newick seems to have problem ...

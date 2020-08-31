@@ -19,6 +19,7 @@ import dendropy
 from logdate.tree_lib import tree_as_newick
 from sys import stdout
 from logdate.lca_lib import find_LCAs
+import logging
 
 MAX_ITER = 50000
 MIN_NU = 1e-12
@@ -159,11 +160,11 @@ def logIt(tree,f_obj,cons_eq,b,x0=None,maxIter=MAX_ITER,pseudo=0,seqLen=1000,ver
 
     f,g,h = f_obj(pseudo=pseudo,seqLen=seqLen)
     
-    print("Initial state:" )
-    print("mu = " + str(x_init[-2]))
-    print("fx = " + str(f(x_init,args)))
-    #print(x_init)
-    print("Maximum constraint violation: " + str(np.max(csr_matrix(cons_eq).dot(x_init))))  
+    logging.info("Initial state:" )
+    logging.info("mu = " + str(x_init[-2]))
+    logging.info("fx = " + str(f(x_init,args)))
+    #logging.info(x_init)
+    logging.info("Maximum constraint violation: " + str(np.max(csr_matrix(cons_eq).dot(x_init))))
     
     result = minimize(fun=f,method="trust-constr",x0=x_init,bounds=bounds,args=args,constraints=[linear_constraint],options={'disp': True,'verbose':3 if verbose else 1,'maxiter':maxIter},jac=g,hess=h)
    
@@ -234,7 +235,7 @@ def random_timetree(tree,sampling_time,nrep,seed=None,root_age=None,leaf_age=Non
     
     setup_constraint(tree,smpl_times,root_age=root_age)
     X,seed,_ = random_date_init(tree,smpl_times,nrep,min_nleaf=min_nleaf,rootAge=root_age,seed=seed)
-    print("Finished initialization with random seed " + str(seed))
+    logging.info("Finished initialization with random seed " + str(seed))
     
     for x in X:
         s_tree,t_tree = scale_tree(tree,x)
@@ -245,7 +246,7 @@ def logDate_with_random_init(tree,f_obj,sampling_time=None,bw_time=False,as_date
     smpl_times = setup_smpl_time(tree,sampling_time=sampling_time,bw_time=bw_time,as_date=as_date,root_time=root_time,leaf_time=leaf_time)    
     X,seed,T0 = random_date_init(tree,smpl_times,nrep,min_nleaf=min_nleaf,seed=seed)
     
-    print("Finished initialization with random seed " + str(seed))
+    logging.info("Finished initialization with random seed " + str(seed))
     f_min = None
     x_best = None
 
@@ -257,7 +258,7 @@ def logDate_with_random_init(tree,f_obj,sampling_time=None,bw_time=False,as_date
     for i,y in enumerate(zip(X,T0)):
         x0 = y[0] + [y[1]]
         _,f,x = logIt(tree,f_obj,cons_eq,b,x0=x0,maxIter=maxIter,pseudo=pseudo,seqLen=seqLen,verbose=verbose)
-        print("Found local optimal for Initial point " + str(i+1))
+        logging.info("Found local optimal for Initial point " + str(i+1))
         n_succeed += 1                
         
         if f_min is None or f < f_min:
@@ -265,9 +266,9 @@ def logDate_with_random_init(tree,f_obj,sampling_time=None,bw_time=False,as_date
             x_best = x
             s_tree,t_tree = scale_tree(tree,x_best)
             compute_divergence_time(t_tree,smpl_times,bw_time=bw_time,as_date=as_date)
-            print("Found a better log-scored configuration")
-            print("New mutation rate: " + str(x_best[-2]))
-            print("New log score: " + str(f_min))
+            logging.info("Found a better log-scored configuration")
+            logging.info("New mutation rate: " + str(x_best[-2]))
+            logging.info("New log score: " + str(f_min))
     
     mu = x_best[-2]
     return mu,f_min,x_best,s_tree,t_tree 
@@ -497,7 +498,7 @@ def compute_divergence_time(tree,sampling_time,bw_time=False,as_date=False):
                 t1 = c.time - c.edge_length
                 t = t1 if t is None else t
                 if abs(t-t1) > EPSILON_t:
-                    print("WARNING: Inconsistent divergence time computed for node " + lb + ". Violate by " + str(abs(t-t1)))
+                    logging.warning("WARNING: Inconsistent divergence time computed for node " + lb + ". Violate by " + str(abs(t-t1)))
                 #assert abs(t-t1) < EPSILON_t, "Inconsistent divergence time computed for node " + lb
             else:
                 stk.append(c)
