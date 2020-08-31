@@ -223,7 +223,8 @@ def setup_smpl_time(tree,sampling_time=None,bw_time=False,as_date=False,root_tim
             lb = node.taxon.label if node.is_leaf() else node.label            
         smpl_times[lb] = time        
     return smpl_times   
-    
+
+'''    
 def random_timetree(tree,sampling_time,nrep,seed=None,root_age=None,leaf_age=None,min_nleaf=3,fout=stdout):
     smpl_times = setup_smpl_time(tree,sampling_time=sampling_time,root_age=root_age,leaf_age=leaf_age)
     
@@ -240,7 +241,7 @@ def random_timetree(tree,sampling_time,nrep,seed=None,root_age=None,leaf_age=Non
     for x in X:
         s_tree,t_tree = scale_tree(tree,x)
         fout.write(t_tree.as_string("newick"))
-    
+'''
 
 def logDate_with_random_init(tree,f_obj,sampling_time=None,bw_time=False,as_date=False,root_time=0,leaf_time=1,nrep=1,min_nleaf=3,maxIter=MAX_ITER,seed=None,pseudo=0,seqLen=1000,verbose=False):
     smpl_times = setup_smpl_time(tree,sampling_time=sampling_time,bw_time=bw_time,as_date=as_date,root_time=root_time,leaf_time=leaf_time)    
@@ -264,15 +265,15 @@ def logDate_with_random_init(tree,f_obj,sampling_time=None,bw_time=False,as_date
         if f_min is None or f < f_min:
             f_min = f
             x_best = x
-            s_tree,t_tree = scale_tree(tree,x_best)
-            mu_ = x_best[-2]
-            compute_divergence_time(t_tree,smpl_times,mu_,X[0],bw_time=bw_time,as_date=as_date)
             logging.info("Found a better log-scored configuration")
             logging.info("New mutation rate: " + str(x_best[-2]))
             logging.info("New log score: " + str(f_min))
-    
+    scale_tree(tree, x_best)
+    #mu_ = x_best[-2]  # mu is second to last in x_best
+    compute_divergence_time(tree, smpl_times, x_best, bw_time=bw_time, as_date=as_date)
+
     mu = x_best[-2]
-    return mu,f_min,x_best,s_tree,t_tree 
+    return mu,f_min,x_best,tree
     
 
 def logDate_with_lsd(tree,sampling_time,root_age=None,brScale=False,lsdDir=None,seqLen=1000,maxIter=MAX_ITER):
@@ -297,9 +298,9 @@ def logDate_with_lsd(tree,sampling_time,root_age=None,brScale=False,lsdDir=None,
     if lsdDir is None:
         rmtree(wdir)
 
-    s_tree,t_tree = scale_tree(tree,x) 
+    scale_tree(tree,x)
 
-    return mu,f,x,s_tree,t_tree   # should I take s_tree out here too?
+    return mu,f,x,tree
 
 def run_lsd(tree,sampling_time,outputDir=None):
     wdir = outputDir if outputDir is not None else mkdtemp()
@@ -433,36 +434,18 @@ def calibrate_log_opt(tree,smpl_times,root_age=None,brScale=False,x0=None):
     return s,f1(x),x
 
 def scale_tree(tree,x):
-    taxa = tree.taxon_namespace
-    s_tree = Tree.get(data=tree.as_string("newick"),taxon_namespace=taxa,schema="newick",rooting="force-rooted")
-
     tree.is_rooted = True
-    tree.encode_bipartitions()
-    s_tree.encode_bipartitions()
 
-    mapping = {}
     mu = x[-2]
+
     for node in tree.postorder_node_iter():
-        if node is not tree.seed_node and node.is_active:
-            key = node.bipartition    
-            mapping[key] = node.idx
+        if node is not tree.seed_node:
+            if node.is_active:
+                nu = x[node.idx]
+                node.edge_length *= nu/mu
 
-    for node in s_tree.postorder_node_iter():
-        if node is not s_tree.seed_node:
-            if node.bipartition in mapping:
-                idx = mapping[node.bipartition]
-                node.edge_length *= x[idx]
-
-    #t_tree = Tree.get(data=s_tree.as_string("newick"),taxon_namespace=taxa,schema="newick",rooting="force-rooted")
-    t_tree = Tree.get(data=s_tree.as_string("newick"),schema="newick",rooting="force-rooted")
     
-    for node in t_tree.postorder_node_iter():
-        if node is not t_tree.seed_node:
-            node.edge_length /= mu
-
-    return s_tree,t_tree    
-    
-def compute_divergence_time(tree,sampling_time,mu,X,bw_time=False,as_date=False):
+def compute_divergence_time(tree,sampling_time,x,bw_time=False,as_date=False):
 # compute and place the divergence time onto the node label of the tree
 # must have at least one sampling time. Assumming the tree branches have been
 # converted to time unit and are consistent with the given sampling_time
@@ -506,7 +489,7 @@ def compute_divergence_time(tree,sampling_time,mu,X,bw_time=False,as_date=False)
         node.time = t
 
     # place the divergence time and mutation rate onto the label
-    i = 0
+    mu = x[-2]
     for node in tree.postorder_node_iter():
         lb = node.taxon.label if node.is_leaf() else node.label
         assert node.time is not None, "Failed to compute divergence time for node " + lb
@@ -514,9 +497,12 @@ def compute_divergence_time(tree,sampling_time,mu,X,bw_time=False,as_date=False)
             divTime = days_to_date(node.time)
         else:
             divTime = str(node.time) if not bw_time else str(-node.time)
-        node.mutation_rate = mu / X[i]
-        i += 1
-        mut_rate = str(node.mutation_rate)
+        if node is not tree.seed_node:
+            nu = x[node.idx] if node.is_active else 1.0
+            node.mutation_rate = mu/nu
+            mut_rate = str(node.mutation_rate)
+        else:
+            mut_rate = str(mu)
         lb += "[t=" + divTime + ", mu=" + mut_rate + "]"
         if not node.is_leaf():
             node.label = lb
