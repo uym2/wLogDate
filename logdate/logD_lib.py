@@ -245,7 +245,7 @@ def random_timetree(tree,sampling_time,nrep,seed=None,root_age=None,leaf_age=Non
 def logDate_with_random_init(tree,f_obj,sampling_time=None,bw_time=False,as_date=False,root_time=0,leaf_time=1,nrep=1,min_nleaf=3,maxIter=MAX_ITER,seed=None,pseudo=0,seqLen=1000,verbose=False):
     smpl_times = setup_smpl_time(tree,sampling_time=sampling_time,bw_time=bw_time,as_date=as_date,root_time=root_time,leaf_time=leaf_time)    
     X,seed,T0 = random_date_init(tree,smpl_times,nrep,min_nleaf=min_nleaf,seed=seed)
-    
+
     logging.info("Finished initialization with random seed " + str(seed))
     f_min = None
     x_best = None
@@ -265,7 +265,8 @@ def logDate_with_random_init(tree,f_obj,sampling_time=None,bw_time=False,as_date
             f_min = f
             x_best = x
             s_tree,t_tree = scale_tree(tree,x_best)
-            compute_divergence_time(t_tree,smpl_times,bw_time=bw_time,as_date=as_date)
+            mu_ = x_best[-2]
+            compute_divergence_time(t_tree,smpl_times,mu_,X[0],bw_time=bw_time,as_date=as_date)
             logging.info("Found a better log-scored configuration")
             logging.info("New mutation rate: " + str(x_best[-2]))
             logging.info("New log score: " + str(f_min))
@@ -298,7 +299,7 @@ def logDate_with_lsd(tree,sampling_time,root_age=None,brScale=False,lsdDir=None,
 
     s_tree,t_tree = scale_tree(tree,x) 
 
-    return mu,f,x,s_tree,t_tree   
+    return mu,f,x,s_tree,t_tree   # should I take s_tree out here too?
 
 def run_lsd(tree,sampling_time,outputDir=None):
     wdir = outputDir if outputDir is not None else mkdtemp()
@@ -461,13 +462,13 @@ def scale_tree(tree,x):
 
     return s_tree,t_tree    
     
-def compute_divergence_time(tree,sampling_time,bw_time=False,as_date=False):
+def compute_divergence_time(tree,sampling_time,mu,X,bw_time=False,as_date=False):
 # compute and place the divergence time onto the node label of the tree
 # must have at least one sampling time. Assumming the tree branches have been
 # converted to time unit and are consistent with the given sampling_time
     calibrated = []
     for node in tree.postorder_node_iter():
-        node.time = None
+        node.time,node.mutation_rate = None,None
         lb = node.taxon.label if node.is_leaf() else node.label
         if lb in sampling_time:
             node.time = sampling_time[lb]
@@ -503,16 +504,19 @@ def compute_divergence_time(tree,sampling_time,bw_time=False,as_date=False):
             else:
                 stk.append(c)
         node.time = t
-                
-        
-    # place the divergence time onto the label
-    for node in tree.postorder_node_iter():                
+
+    # place the divergence time and mutation rate onto the label
+    i = 0
+    for node in tree.postorder_node_iter():
         lb = node.taxon.label if node.is_leaf() else node.label
         assert node.time is not None, "Failed to compute divergence time for node " + lb
         if as_date:
             divTime = days_to_date(node.time)
         else:
-            divTime = str(node.time) if not bw_time else str(-node.time)     
-        lb += "[t=" + divTime + "]" 
+            divTime = str(node.time) if not bw_time else str(-node.time)
+        node.mutation_rate = mu / X[i]
+        i += 1
+        mut_rate = str(node.mutation_rate)
+        lb += "[t=" + divTime + ", mu=" + mut_rate + "]"
         if not node.is_leaf():
-            node.label = lb            
+            node.label = lb
