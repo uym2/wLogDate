@@ -94,8 +94,8 @@ def main():
         mu,f,x,tree = logDate_with_random_init(tree,f_obj,sampling_time,bw_time=bw_time,as_date=as_date,root_time=tR,leaf_time=tL,nrep=nrep,min_nleaf=10,maxIter=maxIter,seed=randseed,pseudo=pseudo,seqLen=seqLen,verbose=verbose)
         tree_as_newick(tree,outfile=args["output"],append=True)
         logging.warning("test")
-        logging.basicConfig(stream=stdout,level = logging.INFO)
-        logger = logging.getLogger('LOGGER_NAME')
+        logger = logging.getLogger()
+        logger.setLevel(logging.DEBUG)
         logger.info("Clock rate: " + str(mu))
         logger.info("Log score: " + str(f))
 
