@@ -6,7 +6,10 @@ The algorithm is developed by Uyen Mai and Siavash Mirarab. The code is develope
 
 #### Publication
 
-The paper is currently under review and a preprint can be found [here](https://www.biorxiv.org/content/10.1101/2019.12.20.885582v3).
+Mai, Uyen, and Siavash Mirarab. “Log Transformation Improves Dating of Phylogenies.” Molecular Biology and Evolution, in press 2020
+
+* Abstract appeared at RECOMB 2020
+
 
 #### Contact
 Please submit questions and bug reports as [issues](https://github.com/uym2/wLogDate/issues).
