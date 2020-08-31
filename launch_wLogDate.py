@@ -6,7 +6,7 @@ from dendropy import Tree
 from os import remove,path
 from logdate.tree_lib import tree_as_newick
 import argparse
-from sys import argv,exit
+from sys import argv,exit,stdout
 import logging
 
 def main():
@@ -93,8 +93,11 @@ def main():
         # dating        
         mu,f,x,tree = logDate_with_random_init(tree,f_obj,sampling_time,bw_time=bw_time,as_date=as_date,root_time=tR,leaf_time=tL,nrep=nrep,min_nleaf=10,maxIter=maxIter,seed=randseed,pseudo=pseudo,seqLen=seqLen,verbose=verbose)
         tree_as_newick(tree,outfile=args["output"],append=True)
-        logging.info("Clock rate: " + str(mu))
-        logging.info("Log score: " + str(f))
+        logging.warning("test")
+        logging.basicConfig(stream=stdout,level = logging.INFO)
+        logger = logging.getLogger('LOGGER_NAME')
+        logger.info("Clock rate: " + str(mu))
+        logger.info("Log score: " + str(f))
 
 if __name__ == "__main__":
     main()
