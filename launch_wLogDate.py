@@ -93,11 +93,39 @@ def main():
         # dating        
         mu,f,x,tree = logDate_with_random_init(tree,f_obj,sampling_time,bw_time=bw_time,as_date=as_date,root_time=tR,leaf_time=tL,nrep=nrep,min_nleaf=10,maxIter=maxIter,seed=randseed,pseudo=pseudo,seqLen=seqLen,verbose=verbose)
         tree_as_newick(tree,outfile=args["output"],append=True)
-        logging.warning("test")
-        logger = logging.getLogger()
-        logger.setLevel(logging.DEBUG)
+
+        print("\n")
+        logger = logging.getLogger("main")
+        logger.setLevel(logging.INFO)
+        handler = logging.StreamHandler(stdout)
+        logger.addHandler(handler)
+        logger.propagate = False
+        logger.warning("test")
         logger.info("Clock rate: " + str(mu))
         logger.info("Log score: " + str(f))
+        logger.removeHandler(handler)
+        print("\n")
+
+        logger2 = logging.getLogger("main")
+        logger2.setLevel(logging.INFO)
+        logger2.propagate = True
+        logger2.warning("test")
+        logger2.info("Clock rate: " + str(mu))
+        logger2.info("Log score: " + str(f))
+        print("\n")
+
+        logger3 = logging.getLogger("main")
+        logger3.setLevel(logging.INFO)
+        handler3 = logging.StreamHandler(stdout)
+        formatter = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
+        # ^could reformat in any way
+        handler3.setFormatter(formatter)
+        logger3.addHandler(handler3)
+        logger3.propagate = False
+        logger3.warning("test")
+        logger3.info("Clock rate: " + str(mu))
+        logger3.info("Log score: " + str(f))
+        logger3.removeHandler(handler3)
 
 if __name__ == "__main__":
     main()
