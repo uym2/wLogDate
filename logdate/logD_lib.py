@@ -151,13 +151,13 @@ def setup_constraint_old(tree,smpl_times):
 
 def logIt(tree,f_obj,cons_eq,b,x0=None,maxIter=MAX_ITER,pseudo=0,seqLen=1000,verbose=False):
     N = len([node for node in tree.postorder_node_iter() if node.is_active])-1
-
+    print("logIt working")
     bounds = Bounds(np.array([MIN_NU]*N+[MIN_MU]+[-np.inf]),np.array([np.inf]*(N+2)),keep_feasible=False)
     x_init = x0
-    
+    print("bounds done")
     args = (b)
     linear_constraint = LinearConstraint(csr_matrix(cons_eq),[0]*len(cons_eq),[0]*len(cons_eq),keep_feasible=False)
-
+    print("constraints done")
     f,g,h = f_obj(pseudo=pseudo,seqLen=seqLen)
     
     logging.info("Initial state:" )
@@ -167,7 +167,7 @@ def logIt(tree,f_obj,cons_eq,b,x0=None,maxIter=MAX_ITER,pseudo=0,seqLen=1000,ver
     logging.info("Maximum constraint violation: " + str(np.max(csr_matrix(cons_eq).dot(x_init))))
     
     result = minimize(fun=f,method="trust-constr",x0=x_init,bounds=bounds,args=args,constraints=[linear_constraint],options={'disp': True,'verbose':3 if verbose else 1,'maxiter':maxIter},jac=g,hess=h)
-   
+    print("minimize done")
     x_opt = result.x
     mu = x_opt[N]
     fx = result.fun  
@@ -248,6 +248,7 @@ def logDate_with_random_init(tree,f_obj,sampling_time=None,bw_time=False,as_date
     X,seed,T0 = random_date_init(tree,smpl_times,nrep,min_nleaf=min_nleaf,seed=seed)
 
     logging.info("Finished initialization with random seed " + str(seed))
+    print("Finished initialization with random seed " + str(seed))
     f_min = None
     x_best = None
 
@@ -259,6 +260,7 @@ def logDate_with_random_init(tree,f_obj,sampling_time=None,bw_time=False,as_date
     for i,y in enumerate(zip(X,T0)):
         x0 = y[0] + [y[1]]
         _,f,x = logIt(tree,f_obj,cons_eq,b,x0=x0,maxIter=maxIter,pseudo=pseudo,seqLen=seqLen,verbose=verbose)
+        print("logIt works")
         logging.info("Found local optimal for Initial point " + str(i+1))
         n_succeed += 1                
         
@@ -270,7 +272,7 @@ def logDate_with_random_init(tree,f_obj,sampling_time=None,bw_time=False,as_date
             logging.info("New log score: " + str(f_min))
     scale_tree(tree, x_best)
     compute_divergence_time(tree, smpl_times, x_best, bw_time=bw_time, as_date=as_date)
-
+    print("almost done")
     mu = x_best[-2]
     return mu,f_min,x_best,tree
     
@@ -502,6 +504,13 @@ def compute_divergence_time(tree,sampling_time,x,bw_time=False,as_date=False):
             mut_rate = str(node.mutation_rate)
         else:
             mut_rate = str(mu)
+        print("lb: ", lb)
+        print("mut_rate:", mut_rate)
+        print("divTime", divTime)
+        if mut_rate is None:
+            print("mut_rate is none")
+        if divTime is None:
+            print("divTime is None")
         lb += "[t=" + divTime + ", mu=" + mut_rate + "]"
         if not node.is_leaf():
             node.label = lb
