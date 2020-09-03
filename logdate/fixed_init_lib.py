@@ -7,6 +7,7 @@ import logging
 
 EPSILON_nu = 1e-5
 EPSILON_t = 1e-3
+EPSILON = 1e-10
 
 def init_calibrate(tree,sampling_time):
     for node in tree.postorder_node_iter():
@@ -164,7 +165,7 @@ def compute_date_as_root(a_node):
             stack += [ c for c in node.child_node_iter() if c.is_active ] 
 
     t = None
-    if SD*ST != n*SDT:
+    if abs(SD*ST-n*SDT) > EPSILON:
         t_star = (STS*SD - SDT*ST) / (SD*ST - n*SDT)
         if (a_node.tmax is None or t_star < a_node.tmax) and (a_node.tmin is None or t_star > a_node.tmin):
             t = t_star
