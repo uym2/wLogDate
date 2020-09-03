@@ -1,6 +1,6 @@
 from bitsets import bitset
 from dendropy import Tree,Node
-from sys import argv
+from sys import argv,stdout
 from math import log, sqrt, exp
 import random
 import logging
@@ -8,6 +8,14 @@ import logging
 EPSILON_nu = 1e-5
 EPSILON_t = 1e-3
 EPSILON = 1e-10
+
+logger = logging.getLogger("fixed_init_lib")
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler(stdout)
+formatter = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.propagate = False
 
 def init_calibrate(tree,sampling_time):
     for node in tree.postorder_node_iter():
@@ -248,7 +256,7 @@ def random_date_init(tree, sampling_time, rep, min_nleaf=3, seed=None):
     preprocess(tree,sampling_time)
     node_list = get_uncalibrated_nodes(tree,sampling_time,min_nleaf=min_nleaf)
     if not node_list:
-        logging.warning("Warning: few calibration points were given. Set min_nleaf to 1 to maximize the number of possible initials")
+        logger.warning("few calibration points were given. Set min_nleaf to 1 to maximize the number of possible initials")
         node_list = get_uncalibrated_nodes(tree,sampling_time,min_nleaf=1)
     k = len(node_list) # k should always be larger than 0, by construction
 
@@ -257,7 +265,7 @@ def random_date_init(tree, sampling_time, rep, min_nleaf=3, seed=None):
     if k < rep and 2**k <= rep: # include k < rep to avoid computing 2**k if k is obviously large
         nrep = 2**k
         is_lacking = True
-        logging.warning("Warning: do not have enough calibration points/sampling time to construct " + str(rep) + " distinct initials. Reduced to " + str(nrep))
+        logger.warning("do not have enough calibration points/sampling time to construct " + str(rep) + " distinct initials. Reduced to " + str(nrep))
     node_bitset = bitset('node_bitset',node_list)
 
     for i in range(nrep):
