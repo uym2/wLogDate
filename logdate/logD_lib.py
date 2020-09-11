@@ -46,6 +46,71 @@ def f_wLogDate(pseudo=0,seqLen=1000):
 
     return f,g,h
 
+def f_wLogDate_changeVar(pseudo=0,seqLen=1000):
+# simply change variable in wLogDate: y_i = nu_i*b_i for nu_i in x[:-2]
+# this must be used with the change vars constraints
+    def f(x,*args):
+        B = args[0]
+        W = [sqrt(b+pseudo/seqLen) for b in B]
+        return sum(w*log(abs(y/b))**2 for (w,y,b) in zip(W,x[:-2],B))
+    
+    def g(x,*args):    
+        B = args[0]
+        W = [sqrt(b+pseudo/seqLen) for b in B]
+        return np.array([2*w*log(abs(y/b))/y for (w,y,b) in zip(W,x[:-2],B)] + [0,0])
+
+    def h(x,*args):    
+        B = args[0]
+        W = [sqrt(b+pseudo/seqLen) for b in B]
+        return diags([(2*w*b-2*w*log(abs(y/b)))/y**2 for (w,y,b) in zip(W,x[:-2],B)]+[0,0])
+
+    return f,g,h
+
+def setup_constraint_changeVar(tree,smpl_times):
+    active_set = [node for node in tree.postorder_node_iter() if node.is_active]
+    N = len(active_set)-1
+    cons_eq = []
+    
+    idx = 0
+    b = [1.]*N
+    
+    for node in active_set:
+        node.idx = idx
+        idx += 1
+        new_constraint = None        
+        lb = node.taxon.label if node.is_leaf() else node.label
+        C = [ c for c in node.child_node_iter() if c.is_active ]
+        
+        if lb in smpl_times:
+            node.height = 0
+            new_constraint = [0.0]*(N+2)
+            new_constraint[N] = -smpl_times[lb]            
+            new_constraint[N+1] = 1           
+            for c in C:
+                a = c.constraint[:-2] + [smpl_times[lb]+c.constraint[-2]] + [0]
+                cons_eq.append(a)
+        elif not node.as_leaf:  
+            c0 = C[0]
+            min_height = c0.height      
+            closest_child = c0
+            for c in C[1:]:
+                # add new constraint
+                a = [ (c.constraint[i] - c0.constraint[i]) for i in range(N+2) ]
+                cons_eq.append(a)
+                # compute height
+                if c.height < min_height:
+                    min_height = c.height
+                    closest_child = c
+            node.height = min_height + 1
+            new_constraint = closest_child.constraint
+        
+        node.constraint = new_constraint
+        if node is not tree.seed_node and node.constraint is not None:    
+            node.constraint[node.idx] = 1
+            b[node.idx] = node.edge_length
+    
+    return cons_eq,b
+
 def setup_constraint(tree,smpl_times):
     active_set = [node for node in tree.postorder_node_iter() if node.is_active]
     N = len(active_set)-1
@@ -258,17 +323,18 @@ def logDate_with_random_init(tree,f_obj,sampling_time=None,bw_time=False,as_date
     i = 0
     n_succeed = 0
     
-    cons_eq,b = setup_constraint(tree,smpl_times)
+    cons_eq,b = setup_constraint_changeVar(tree,smpl_times)
 
     for i,y in enumerate(zip(X,T0)):
         x0 = y[0] + [y[1]]
-        _,f,x = logIt(tree,f_obj,cons_eq,b,x0=x0,maxIter=maxIter,pseudo=pseudo,seqLen=seqLen,verbose=verbose)
+        z0 = [x_i*b_i for (x_i,b_i) in zip(x0[:-2],b)] + [x0[-2],x0[-1]]
+        _,f,z = logIt(tree,f_obj,cons_eq,b,x0=z0,maxIter=maxIter,pseudo=pseudo,seqLen=seqLen,verbose=verbose)
         logger.info("Found local optimal for Initial point " + str(i+1))
         n_succeed += 1                
         
         if f_min is None or f < f_min:
             f_min = f
-            x_best = x
+            x_best = [z_i/b_i for (z_i,b_i) in zip(z[:-2],b)] + [z[-2],z[-1]]
             logger.info("Found a better log-scored configuration")
             logger.info("New mutation rate: " + str(x_best[-2]))
             logger.info("New log score: " + str(f_min))

@@ -20,6 +20,8 @@ logger.propagate = False
 def init_calibrate(tree,sampling_time):
     for node in tree.postorder_node_iter():
         node.time = None
+        node.tmin = None
+        node.tmax = None
         lb = node.taxon.label if node.is_leaf() else node.label
         if lb in sampling_time:
             node.time = sampling_time[lb]
@@ -61,8 +63,11 @@ def compute_tmin(tree):
     for node in tree.preorder_node_iter():
         if node.time is not None: # this node is calibrated
             node.tmin = node.time
+        elif node is tree.seed_node:
+            node.tmin = compute_date_as_root(node)    
         else:
-            node.tmin = None if node is tree.seed_node else node.parent_node.tmin
+            #node.tmin = None if node is tree.seed_node else node.parent_node.tmin
+            node.tmin = node.parent_node.tmin
 
 def reset(tree,sampling_time):
     init_calibrate(tree,sampling_time)
@@ -117,8 +122,10 @@ def calibrate_set(tree,node_list):
     # if the root has not been calibrated, now we have to calibrate it
     if tree.seed_node.time is None:
         preprocess_node(tree.seed_node)
-        t = compute_date_as_root(tree.seed_node)
-        tree.seed_node.time = t if t is not None else tree.seed_node.tmax - EPSILON_t
+        #t = compute_date_as_root(tree.seed_node)
+        #tree.seed_node.time = t if t is not None else tree.seed_node.tmax - EPSILON_t
+        t_min = min(node.time for node in tree.preorder_node_iter() if node.time is not None)
+        tree.seed_node.time = t_min - EPSILON_t
         date_from_root_and_leaves(tree.seed_node)
     return tree.seed_node.time    
 
@@ -220,7 +227,7 @@ def get_init_from_dated_tree(tree):
             c += w*(log(alpha)**2)
 
     mu = exp(-b/2/a)
-  
+    print(mu)  
     for node in tree.postorder_node_iter():
         if node is not tree.seed_node and node.is_active:
             #nu = mu*(node.time - node.parent_node.time)/node.edge_length if node.is_active else 1

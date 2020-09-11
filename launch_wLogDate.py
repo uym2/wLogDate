@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 import logdate
-from logdate.logD_lib import logDate_with_random_init,f_wLogDate
+from logdate.logD_lib import logDate_with_random_init,f_wLogDate,f_wLogDate_changeVar
 from dendropy import Tree
 from os import remove,path
 from logdate.tree_lib import tree_as_newick
@@ -57,7 +57,7 @@ def main():
     randseed = int(args["rseed"]) if args["rseed"] else None
     zero_len = float(args["zero"]) if args["zero"] else 1e-10
 
-    f_obj = f_wLogDate
+    f_obj = f_wLogDate_changeVar
     verbose = args["verbose"]
     do_label = not args["keeplabel"]
     bw_time = args["backward"]
