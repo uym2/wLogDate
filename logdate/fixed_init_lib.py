@@ -7,7 +7,7 @@ import logging
 
 EPSILON_nu = 1e-5
 EPSILON_t = 1e-3
-EPSILON = 1e-10
+EPSILON = 1e-5
 
 logger = logging.getLogger("fixed_init_lib")
 logger.setLevel(logging.INFO)

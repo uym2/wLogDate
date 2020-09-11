@@ -24,7 +24,7 @@ import logging
 MAX_ITER = 50000
 MIN_NU = 1e-12
 MIN_MU = 1e-5
-EPSILON_t = 1e-5
+EPSILON_t = 1e-4
 
 logger = logging.getLogger("logD_lib")
 logger.setLevel(logging.INFO)
