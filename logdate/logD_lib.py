@@ -50,13 +50,13 @@ def f_wLogDate_changeVar(pseudo=0,seqLen=1000):
 # simply change variable in wLogDate: y_i = nu_i*b_i for nu_i in x[:-2]
 # this must be used with the change vars constraints
     def f(x,*args):
-        B = args[0]
-        W = [sqrt(b+pseudo/seqLen) for b in B]
+        B = [sqrt(b) for b in args[0]]
+        W = [sqrt(b+pseudo/seqLen) for b in args[0]]
         return sum(w*log(abs(y/b))**2 for (w,y,b) in zip(W,x[:-2],B))
     
     def g(x,*args):    
-        B = args[0]
-        W = [sqrt(b+pseudo/seqLen) for b in B]
+        B = [sqrt(b) for b in args[0]]
+        W = [sqrt(b+pseudo/seqLen) for b in args[0]]
         return np.array([2*w*log(abs(y/b))/y for (w,y,b) in zip(W,x[:-2],B)] + [0,0])
 
     def h(x,*args):    
@@ -106,7 +106,7 @@ def setup_constraint_changeVar(tree,smpl_times):
         
         node.constraint = new_constraint
         if node is not tree.seed_node and node.constraint is not None:    
-            node.constraint[node.idx] = 1
+            node.constraint[node.idx] = sqrt(node.edge_length)
             b[node.idx] = node.edge_length
     
     return cons_eq,b
@@ -327,14 +327,14 @@ def logDate_with_random_init(tree,f_obj,sampling_time=None,bw_time=False,as_date
 
     for i,y in enumerate(zip(X,T0)):
         x0 = y[0] + [y[1]]
-        z0 = [x_i*b_i for (x_i,b_i) in zip(x0[:-2],b)] + [x0[-2],x0[-1]]
+        z0 = [x_i*sqrt(b_i) for (x_i,b_i) in zip(x0[:-2],b)] + [x0[-2],x0[-1]]
         _,f,z = logIt(tree,f_obj,cons_eq,b,x0=z0,maxIter=maxIter,pseudo=pseudo,seqLen=seqLen,verbose=verbose)
         logger.info("Found local optimal for Initial point " + str(i+1))
         n_succeed += 1                
         
         if f_min is None or f < f_min:
             f_min = f
-            x_best = [z_i/b_i for (z_i,b_i) in zip(z[:-2],b)] + [z[-2],z[-1]]
+            x_best = [z_i/sqrt(b_i) for (z_i,b_i) in zip(z[:-2],b)] + [z[-2],z[-1]]
             logger.info("Found a better log-scored configuration")
             logger.info("New mutation rate: " + str(x_best[-2]))
             logger.info("New log score: " + str(f_min))
