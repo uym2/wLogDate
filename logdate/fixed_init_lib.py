@@ -6,7 +6,7 @@ import random
 
 EPSILON_nu = 1e-5
 EPSILON_t = 1e-3
-EPSILON = 1e-10
+EPSILON = 1e-3
 
 def init_calibrate(tree,sampling_time):
     for node in tree.postorder_node_iter():
@@ -51,9 +51,11 @@ def compute_tmin(tree):
 # MUST be called AFTER reset and mark_active
     for node in tree.preorder_node_iter():
         if node.time is not None: # this node is calibrated
-            node.tmin = node.time
+            node.tmin = node.time + EPSILON_t
         else:
             node.tmin = None if node is tree.seed_node else node.parent_node.tmin
+            if node.tmin is not None:
+                node.tmin += EPSILON_t
 
 def reset(tree,sampling_time):
     init_calibrate(tree,sampling_time)
@@ -121,7 +123,7 @@ def preprocess_node(a_node):
         if node.as_leaf:
            node.nearest_calibrated = node
            node.nearest_t = node.time
-           node.tmax = node.time
+           node.tmax = node.time - EPSILON_t
            node.delta_b = node.edge_length
         elif passed:
            min_t = None
@@ -134,7 +136,7 @@ def preprocess_node(a_node):
                     min_child = c
            node.nearest_calibrated = min_child.nearest_calibrated
            node.nearest_t = min_t
-           node.tmax = min_t
+           node.tmax = min_t - EPSILON_t
            node.delta_b = min_child.delta_b + ( node.edge_length if node.edge_length else 0)
         else:
            stack.append((node,True))
