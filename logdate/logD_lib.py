@@ -513,9 +513,8 @@ def scale_tree(tree,x):
 
     for node in tree.postorder_node_iter():
         if node is not tree.seed_node:
-            if node.is_active:
-                nu = x[node.idx]
-                node.edge_length *= nu/mu
+            nu = x[node.idx] if node.is_active else 1.0
+            node.edge_length *= nu/mu
 
     
 def compute_divergence_time(tree,sampling_time,x,bw_time=False,as_date=False):
