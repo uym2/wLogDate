@@ -22,7 +22,7 @@ from logdate.lca_lib import find_LCAs
 import logging
 
 MAX_ITER = 50000
-MIN_NU = 1e-12
+MIN_NU = 1e-18
 MIN_MU = 1e-5
 EPSILON_t = 1e-4
 
@@ -228,10 +228,10 @@ def setup_constraint_old(tree,smpl_times):
 
 def logIt(tree,f_obj,cons_eq,b,x0=None,maxIter=MAX_ITER,pseudo=0,seqLen=1000,verbose=False):
     N = len([node for node in tree.postorder_node_iter() if node.is_active])-1
-    bounds = Bounds(np.array([MIN_NU]*N+[MIN_MU]+[-np.inf]),np.array([np.inf]*(N+2)),keep_feasible=False)
+    bounds = Bounds(np.array([MIN_NU]*N+[MIN_MU]+[-np.inf]),np.array([np.inf]*(N+2)),keep_feasible=True)
     x_init = x0
     args = (b)
-    linear_constraint = LinearConstraint(csr_matrix(cons_eq),[0]*len(cons_eq),[0]*len(cons_eq),keep_feasible=False)
+    linear_constraint = LinearConstraint(csr_matrix(cons_eq),[0]*len(cons_eq),[0]*len(cons_eq),keep_feasible=True)
     f,g,h = f_obj(pseudo=pseudo,seqLen=seqLen)
     
     logger.info("Initial state:" )
@@ -314,7 +314,7 @@ def random_timetree(tree,sampling_time,nrep,seed=None,root_age=None,leaf_age=Non
     for x in X:
         s_tree,t_tree = scale_tree(tree,x)
         fout.write(t_tree.as_string("newick"))
-'''
+'''    
 
 def logDate_with_random_init(tree,f_obj,sampling_time=None,bw_time=False,as_date=False,root_time=0,leaf_time=1,nrep=1,min_nleaf=3,maxIter=MAX_ITER,seed=None,pseudo=0,seqLen=1000,verbose=False):
     smpl_times = setup_smpl_time(tree,sampling_time=sampling_time,bw_time=bw_time,as_date=as_date,root_time=root_time,leaf_time=leaf_time)    
@@ -348,7 +348,6 @@ def logDate_with_random_init(tree,f_obj,sampling_time=None,bw_time=False,as_date
     compute_divergence_time(tree, smpl_times, x_best, bw_time=bw_time, as_date=as_date)
     mu = x_best[-2]
     return mu,f_min,x_best,tree
-    
 
 def logDate_with_lsd(tree,sampling_time,root_age=None,brScale=False,lsdDir=None,seqLen=1000,maxIter=MAX_ITER):
     wdir = run_lsd(tree,sampling_time,outputDir=lsdDir)
