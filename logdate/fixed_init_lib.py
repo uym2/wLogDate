@@ -227,7 +227,6 @@ def get_init_from_dated_tree(tree):
             c += w*(log(alpha)**2)
 
     mu = exp(-b/2/a)
-    print(mu)  
     for node in tree.postorder_node_iter():
         if node is not tree.seed_node and node.is_active:
             #nu = mu*(node.time - node.parent_node.time)/node.edge_length if node.is_active else 1
