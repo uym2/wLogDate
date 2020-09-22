@@ -1,16 +1,27 @@
 from bitsets import bitset
 from dendropy import Tree,Node
-from sys import argv
+from sys import argv,stdout
 from math import log, sqrt, exp
 import random
+import logging
 
 EPSILON_nu = 1e-5
 EPSILON_t = 1e-3
-EPSILON = 1e-10
+EPSILON = 1e-5
+
+logger = logging.getLogger("fixed_init_lib")
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler(stdout)
+formatter = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.propagate = False
 
 def init_calibrate(tree,sampling_time):
     for node in tree.postorder_node_iter():
         node.time = None
+        node.tmin = None
+        node.tmax = None
         lb = node.taxon.label if node.is_leaf() else node.label
         if lb in sampling_time:
             node.time = sampling_time[lb]
@@ -52,8 +63,11 @@ def compute_tmin(tree):
     for node in tree.preorder_node_iter():
         if node.time is not None: # this node is calibrated
             node.tmin = node.time
+        elif node is tree.seed_node:
+            node.tmin = compute_date_as_root(node)    
         else:
-            node.tmin = None if node is tree.seed_node else node.parent_node.tmin
+            #node.tmin = None if node is tree.seed_node else node.parent_node.tmin
+            node.tmin = node.parent_node.tmin
 
 def reset(tree,sampling_time):
     init_calibrate(tree,sampling_time)
@@ -108,8 +122,10 @@ def calibrate_set(tree,node_list):
     # if the root has not been calibrated, now we have to calibrate it
     if tree.seed_node.time is None:
         preprocess_node(tree.seed_node)
-        t = compute_date_as_root(tree.seed_node)
-        tree.seed_node.time = t if t is not None else tree.seed_node.tmax - EPSILON_t
+        #t = compute_date_as_root(tree.seed_node)
+        #tree.seed_node.time = t if t is not None else tree.seed_node.tmax - EPSILON_t
+        t_min = min(node.time for node in tree.preorder_node_iter() if node.time is not None)
+        tree.seed_node.time = t_min - EPSILON_t
         date_from_root_and_leaves(tree.seed_node)
     return tree.seed_node.time    
 
@@ -211,7 +227,6 @@ def get_init_from_dated_tree(tree):
             c += w*(log(alpha)**2)
 
     mu = exp(-b/2/a)
-  
     for node in tree.postorder_node_iter():
         if node is not tree.seed_node and node.is_active:
             #nu = mu*(node.time - node.parent_node.time)/node.edge_length if node.is_active else 1
@@ -247,7 +262,7 @@ def random_date_init(tree, sampling_time, rep, min_nleaf=3, seed=None):
     preprocess(tree,sampling_time)
     node_list = get_uncalibrated_nodes(tree,sampling_time,min_nleaf=min_nleaf)
     if not node_list:
-        print("Warning: few calibration points were given. Set min_nleaf to 1 to maximize the number of possible initials")
+        logger.warning("few calibration points were given. Set min_nleaf to 1 to maximize the number of possible initials")
         node_list = get_uncalibrated_nodes(tree,sampling_time,min_nleaf=1)
     k = len(node_list) # k should always be larger than 0, by construction
 
@@ -256,7 +271,7 @@ def random_date_init(tree, sampling_time, rep, min_nleaf=3, seed=None):
     if k < rep and 2**k <= rep: # include k < rep to avoid computing 2**k if k is obviously large
         nrep = 2**k
         is_lacking = True
-        print("Warning: do not have enough calibration points/sampling time to construct " + str(rep) + " distinct initials. Reduced to " + str(nrep))
+        logger.warning("do not have enough calibration points/sampling time to construct " + str(rep) + " distinct initials. Reduced to " + str(nrep))
     node_bitset = bitset('node_bitset',node_list)
 
     for i in range(nrep):
