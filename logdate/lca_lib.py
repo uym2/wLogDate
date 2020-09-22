@@ -1,4 +1,14 @@
 from dendropy import Tree
+import logging
+from sys import stdout
+
+logger = logging.getLogger("lca_lib")
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler(stdout)
+formatter = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.propagate = False
 
 def find_LCAs(myTree,myQueries):
 # find LCA for each of the list of nodes in myQueries
@@ -68,11 +78,11 @@ def find_LCAs(myTree,myQueries):
                 L = min(F[a],L) if L is not None else F[a]
                 R = max(F[a],R) if R is not None else F[a]
             else:
-                print("WARNING: ignored calibration for taxon " + a + " which is not found in the input tree")
+                logger.warning("ignored calibration for taxon " + a + " which is not found in the input tree")
         try:
             lca = __query__(1,0,len(E)-1,L,R)
         except:
-            print("WARNING: failed to find lca for " + str(q))
+            logger.warning("failed to find lca for " + str(q))
             lca = None    
         return lca    
 
@@ -103,4 +113,4 @@ for q,lca in zip(queries,LCAs):
         print(q,lca.taxon.label)
     else:
         print(q,lca.label)  
-'''        
+'''

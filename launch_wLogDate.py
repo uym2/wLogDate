@@ -1,12 +1,14 @@
 #! /usr/bin/env python
 
 import logdate
-from logdate.logD_lib import logDate_with_random_init,f_wLogDate
+from logdate.logD_lib import logDate_with_random_init,f_wLogDate,f_wLogDate_changeVar
 from dendropy import Tree
 from os import remove,path
 from logdate.tree_lib import tree_as_newick
 import argparse
-from sys import argv,exit
+from sys import argv,exit,stdout
+import logging
+from logdate.util_lib import date_to_days
 
 def main():
     parser = argparse.ArgumentParser()
@@ -32,9 +34,16 @@ def main():
         parser.print_help()
         exit(0)
     args = vars(parser.parse_args())
-    
-    print("Launching " + logdate.PROGRAM_NAME + " version " + logdate.PROGRAM_VERSION)
-    print(logdate.PROGRAM_NAME + " was called as follow: " + " ".join(argv))
+
+    logger = logging.getLogger("main")
+    logger.setLevel(logging.INFO)
+    handler = logging.StreamHandler(stdout)
+    formatter = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.propagate = False
+    logger.info("Launching " + logdate.PROGRAM_NAME + " version " + logdate.PROGRAM_VERSION)
+    logger.info(logdate.PROGRAM_NAME + " was called as follow: " + " ".join(argv))
 
 
     args = vars(parser.parse_args())
@@ -47,7 +56,7 @@ def main():
     randseed = int(args["rseed"]) if args["rseed"] else None
     zero_len = float(args["zero"]) if args["zero"] else 1e-10
 
-    f_obj = f_wLogDate
+    f_obj = f_wLogDate_changeVar
     verbose = args["verbose"]
     do_label = not args["keeplabel"]
     bw_time = args["backward"]
@@ -88,11 +97,11 @@ def main():
         for node in tree.preorder_node_iter():            
             if node is not tree.seed_node:
                 node.edge_length = max(node.edge_length,zero_len)
-        # dating        
-        mu,f,x,s_tree,t_tree = logDate_with_random_init(tree,f_obj,sampling_time,bw_time=bw_time,as_date=as_date,root_time=tR,leaf_time=tL,nrep=nrep,min_nleaf=10,maxIter=maxIter,seed=randseed,pseudo=pseudo,seqLen=seqLen,verbose=verbose)
-        tree_as_newick(t_tree,outfile=args["output"],append=True)
-        print("Clock rate: " + str(mu))
-        print("Log score: " + str(f))
+        # dating
+        mu,f,x,tree = logDate_with_random_init(tree,f_obj,sampling_time,bw_time=bw_time,as_date=as_date,root_time=tR,leaf_time=tL,nrep=nrep,min_nleaf=10,maxIter=maxIter,seed=randseed,pseudo=pseudo,seqLen=seqLen,verbose=verbose)
+        tree_as_newick(tree,outfile=args["output"],append=True)
+        logger.info("Clock rate: " + str(mu))
+        logger.info("Log score: " + str(f))
 
 if __name__ == "__main__":
     main()

@@ -19,11 +19,20 @@ import dendropy
 from logdate.tree_lib import tree_as_newick
 from sys import stdout
 from logdate.lca_lib import find_LCAs
+import logging
 
 MAX_ITER = 50000
-MIN_NU = 1e-12
+MIN_NU = 1e-18
 MIN_MU = 1e-5
-EPSILON_t = 1e-5
+EPSILON_t = 1e-4
+
+logger = logging.getLogger("logD_lib")
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler(stdout)
+formatter = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.propagate = False
 
 def f_wLogDate(pseudo=0,seqLen=1000):
     def f(x,*args):
@@ -36,6 +45,75 @@ def f_wLogDate(pseudo=0,seqLen=1000):
         return diags([sqrt(b+pseudo/seqLen)*(2-2*log(abs(y)))/y**2 for (y,b) in zip(x[:-2],args[0])]+[0,0])	
 
     return f,g,h
+
+def f_wLogDate_changeVar(pseudo=0,seqLen=1000):
+# simply change variable in wLogDate: y_i = nu_i*b_i for nu_i in x[:-2]
+# this must be used with the change vars constraints
+    def f(x,*args):
+        #B = [sqrt(b) for b in args[0]]
+        B = [b for b in args[0]]
+        W = [sqrt(b+pseudo/seqLen) for b in args[0]]
+        return sum(w*log(abs(y/b))**2 for (w,y,b) in zip(W,x[:-2],B))
+    
+    def g(x,*args):    
+        #B = [sqrt(b) for b in args[0]]
+        B = [b for b in args[0]]
+        W = [sqrt(b+pseudo/seqLen) for b in args[0]]
+        return np.array([2*w*log(abs(y/b))/y for (w,y,b) in zip(W,x[:-2],B)] + [0,0])
+
+    def h(x,*args):    
+        #B = [sqrt(b) for b in args[0]]
+        B = [b for b in args[0]]
+        W = [sqrt(b+pseudo/seqLen) for b in args[0]]
+        return diags([(2*w*b-2*w*log(abs(y/b)))/y**2 for (w,y,b) in zip(W,x[:-2],B)]+[0,0])
+
+    return f,g,h
+
+def setup_constraint_changeVar(tree,smpl_times):
+    active_set = [node for node in tree.postorder_node_iter() if node.is_active]
+    N = len(active_set)-1
+    cons_eq = []
+    
+    idx = 0
+    b = [1.]*N
+    
+    for node in active_set:
+        node.idx = idx
+        idx += 1
+        new_constraint = None        
+        lb = node.taxon.label if node.is_leaf() else node.label
+        C = [ c for c in node.child_node_iter() if c.is_active ]
+        
+        if lb in smpl_times:
+            node.height = 0
+            new_constraint = [0.0]*(N+2)
+            new_constraint[N] = -smpl_times[lb]            
+            new_constraint[N+1] = 1           
+            for c in C:
+                a = c.constraint[:-2] + [smpl_times[lb]+c.constraint[-2]] + [0]
+                cons_eq.append(a)
+        elif not node.as_leaf:  
+            c0 = C[0]
+            min_height = c0.height      
+            closest_child = c0
+            for c in C[1:]:
+                # add new constraint
+                a = [ (c.constraint[i] - c0.constraint[i]) for i in range(N+2) ]
+                cons_eq.append(a)
+                # compute height
+                if c.height < min_height:
+                    min_height = c.height
+                    closest_child = c
+            node.height = min_height + 1
+            new_constraint = closest_child.constraint
+        
+        node.constraint = new_constraint
+        if node is not tree.seed_node and node.constraint is not None:    
+            #node.constraint[node.idx] = sqrt(node.edge_length)
+            node.constraint[node.idx] = 1
+            b[node.idx] = node.edge_length
+    
+    return cons_eq,b
 
 def setup_constraint(tree,smpl_times):
     active_set = [node for node in tree.postorder_node_iter() if node.is_active]
@@ -150,23 +228,19 @@ def setup_constraint_old(tree,smpl_times):
 
 def logIt(tree,f_obj,cons_eq,b,x0=None,maxIter=MAX_ITER,pseudo=0,seqLen=1000,verbose=False):
     N = len([node for node in tree.postorder_node_iter() if node.is_active])-1
-
-    bounds = Bounds(np.array([MIN_NU]*N+[MIN_MU]+[-np.inf]),np.array([np.inf]*(N+2)),keep_feasible=False)
+    bounds = Bounds(np.array([MIN_NU]*N+[MIN_MU]+[-np.inf]),np.array([np.inf]*(N+2)),keep_feasible=True)
     x_init = x0
-    
     args = (b)
-    linear_constraint = LinearConstraint(csr_matrix(cons_eq),[0]*len(cons_eq),[0]*len(cons_eq),keep_feasible=False)
-
+    linear_constraint = LinearConstraint(csr_matrix(cons_eq),[0]*len(cons_eq),[0]*len(cons_eq),keep_feasible=True)
     f,g,h = f_obj(pseudo=pseudo,seqLen=seqLen)
     
-    print("Initial state:" )
-    print("mu = " + str(x_init[-2]))
-    print("fx = " + str(f(x_init,args)))
-    #print(x_init)
-    print("Maximum constraint violation: " + str(np.max(csr_matrix(cons_eq).dot(x_init))))  
+    logger.info("Initial state:" )
+    logger.info("mu = " + str(x_init[-2]))
+    logger.info("fx = " + str(f(x_init,args)))
+    #logger.info(x_init)
+    logger.info("Maximum constraint violation: " + str(np.max(csr_matrix(cons_eq).dot(x_init))))
     
     result = minimize(fun=f,method="trust-constr",x0=x_init,bounds=bounds,args=args,constraints=[linear_constraint],options={'disp': True,'verbose':3 if verbose else 1,'maxiter':maxIter},jac=g,hess=h)
-   
     x_opt = result.x
     mu = x_opt[N]
     fx = result.fun  
@@ -222,7 +296,8 @@ def setup_smpl_time(tree,sampling_time=None,bw_time=False,as_date=False,root_tim
             lb = node.taxon.label if node.is_leaf() else node.label            
         smpl_times[lb] = time        
     return smpl_times   
-    
+
+'''    
 def random_timetree(tree,sampling_time,nrep,seed=None,root_age=None,leaf_age=None,min_nleaf=3,fout=stdout):
     smpl_times = setup_smpl_time(tree,sampling_time=sampling_time,root_age=root_age,leaf_age=leaf_age)
     
@@ -234,44 +309,45 @@ def random_timetree(tree,sampling_time,nrep,seed=None,root_age=None,leaf_age=Non
     
     setup_constraint(tree,smpl_times,root_age=root_age)
     X,seed,_ = random_date_init(tree,smpl_times,nrep,min_nleaf=min_nleaf,rootAge=root_age,seed=seed)
-    print("Finished initialization with random seed " + str(seed))
+    logger.info("Finished initialization with random seed " + str(seed))
     
     for x in X:
         s_tree,t_tree = scale_tree(tree,x)
         fout.write(t_tree.as_string("newick"))
-    
+'''    
 
 def logDate_with_random_init(tree,f_obj,sampling_time=None,bw_time=False,as_date=False,root_time=0,leaf_time=1,nrep=1,min_nleaf=3,maxIter=MAX_ITER,seed=None,pseudo=0,seqLen=1000,verbose=False):
     smpl_times = setup_smpl_time(tree,sampling_time=sampling_time,bw_time=bw_time,as_date=as_date,root_time=root_time,leaf_time=leaf_time)    
     X,seed,T0 = random_date_init(tree,smpl_times,nrep,min_nleaf=min_nleaf,seed=seed)
-    
-    print("Finished initialization with random seed " + str(seed))
+
+    logger.info("Finished initialization with random seed " + str(seed))
     f_min = None
     x_best = None
 
     i = 0
     n_succeed = 0
     
-    cons_eq,b = setup_constraint(tree,smpl_times)
+    cons_eq,b = setup_constraint_changeVar(tree,smpl_times)
 
     for i,y in enumerate(zip(X,T0)):
         x0 = y[0] + [y[1]]
-        _,f,x = logIt(tree,f_obj,cons_eq,b,x0=x0,maxIter=maxIter,pseudo=pseudo,seqLen=seqLen,verbose=verbose)
-        print("Found local optimal for Initial point " + str(i+1))
+        #z0 = [x_i*sqrt(b_i) for (x_i,b_i) in zip(x0[:-2],b)] + [x0[-2],x0[-1]]
+        z0 = [x_i*b_i for (x_i,b_i) in zip(x0[:-2],b)] + [x0[-2],x0[-1]]
+        _,f,z = logIt(tree,f_obj,cons_eq,b,x0=z0,maxIter=maxIter,pseudo=pseudo,seqLen=seqLen,verbose=verbose)
+        logger.info("Found local optimal for Initial point " + str(i+1))
         n_succeed += 1                
         
         if f_min is None or f < f_min:
             f_min = f
-            x_best = x
-            s_tree,t_tree = scale_tree(tree,x_best)
-            compute_divergence_time(t_tree,smpl_times,bw_time=bw_time,as_date=as_date)
-            print("Found a better log-scored configuration")
-            print("New mutation rate: " + str(x_best[-2]))
-            print("New log score: " + str(f_min))
-    
+            #x_best = [z_i/sqrt(b_i) for (z_i,b_i) in zip(z[:-2],b)] + [z[-2],z[-1]]
+            x_best = [z_i/b_i for (z_i,b_i) in zip(z[:-2],b)] + [z[-2],z[-1]]
+            logger.info("Found a better log-scored configuration")
+            logger.info("New mutation rate: " + str(x_best[-2]))
+            logger.info("New log score: " + str(f_min))
+    scale_tree(tree, x_best)
+    compute_divergence_time(tree, smpl_times, x_best, bw_time=bw_time, as_date=as_date)
     mu = x_best[-2]
-    return mu,f_min,x_best,s_tree,t_tree 
-    
+    return mu,f_min,x_best,tree
 
 def logDate_with_lsd(tree,sampling_time,root_age=None,brScale=False,lsdDir=None,seqLen=1000,maxIter=MAX_ITER):
     wdir = run_lsd(tree,sampling_time,outputDir=lsdDir)
@@ -295,9 +371,9 @@ def logDate_with_lsd(tree,sampling_time,root_age=None,brScale=False,lsdDir=None,
     if lsdDir is None:
         rmtree(wdir)
 
-    s_tree,t_tree = scale_tree(tree,x) 
+    scale_tree(tree,x)
 
-    return mu,f,x,s_tree,t_tree   
+    return mu,f,x,tree
 
 def run_lsd(tree,sampling_time,outputDir=None):
     wdir = outputDir if outputDir is not None else mkdtemp()
@@ -431,42 +507,23 @@ def calibrate_log_opt(tree,smpl_times,root_age=None,brScale=False,x0=None):
     return s,f1(x),x
 
 def scale_tree(tree,x):
-    taxa = tree.taxon_namespace
-    s_tree = Tree.get(data=tree.as_string("newick"),taxon_namespace=taxa,schema="newick",rooting="force-rooted")
-
     tree.is_rooted = True
-    tree.encode_bipartitions()
-    s_tree.encode_bipartitions()
 
-    mapping = {}
     mu = x[-2]
+
     for node in tree.postorder_node_iter():
-        if node is not tree.seed_node and node.is_active:
-            key = node.bipartition    
-            mapping[key] = node.idx
+        if node is not tree.seed_node:
+            nu = x[node.idx] if node.is_active else 1.0
+            node.edge_length *= nu/mu
 
-    for node in s_tree.postorder_node_iter():
-        if node is not s_tree.seed_node:
-            if node.bipartition in mapping:
-                idx = mapping[node.bipartition]
-                node.edge_length *= x[idx]
-
-    #t_tree = Tree.get(data=s_tree.as_string("newick"),taxon_namespace=taxa,schema="newick",rooting="force-rooted")
-    t_tree = Tree.get(data=s_tree.as_string("newick"),schema="newick",rooting="force-rooted")
     
-    for node in t_tree.postorder_node_iter():
-        if node is not t_tree.seed_node:
-            node.edge_length /= mu
-
-    return s_tree,t_tree    
-    
-def compute_divergence_time(tree,sampling_time,bw_time=False,as_date=False):
+def compute_divergence_time(tree,sampling_time,x,bw_time=False,as_date=False):
 # compute and place the divergence time onto the node label of the tree
 # must have at least one sampling time. Assumming the tree branches have been
 # converted to time unit and are consistent with the given sampling_time
     calibrated = []
     for node in tree.postorder_node_iter():
-        node.time = None
+        node.time,node.mutation_rate = None,None
         lb = node.taxon.label if node.is_leaf() else node.label
         if lb in sampling_time:
             node.time = sampling_time[lb]
@@ -497,21 +554,27 @@ def compute_divergence_time(tree,sampling_time,bw_time=False,as_date=False):
                 t1 = c.time - c.edge_length
                 t = t1 if t is None else t
                 if abs(t-t1) > EPSILON_t:
-                    print("WARNING: Inconsistent divergence time computed for node " + lb + ". Violate by " + str(abs(t-t1)))
+                    logger.warning("Inconsistent divergence time computed for node " + lb + ". Violate by " + str(abs(t-t1)))
                 #assert abs(t-t1) < EPSILON_t, "Inconsistent divergence time computed for node " + lb
             else:
                 stk.append(c)
         node.time = t
-                
-        
-    # place the divergence time onto the label
-    for node in tree.postorder_node_iter():                
+
+    # place the divergence time and mutation rate onto the label
+    mu = x[-2]
+    for node in tree.postorder_node_iter():
         lb = node.taxon.label if node.is_leaf() else node.label
         assert node.time is not None, "Failed to compute divergence time for node " + lb
         if as_date:
             divTime = days_to_date(node.time)
         else:
-            divTime = str(node.time) if not bw_time else str(-node.time)     
-        lb += "[t=" + divTime + "]" 
+            divTime = str(node.time) if not bw_time else str(-node.time)
+        if node is not tree.seed_node:
+            nu = x[node.idx] if node.is_active else 1.0
+            node.mutation_rate = mu/nu
+            mut_rate = str(node.mutation_rate)
+        else:
+            mut_rate = str(mu)
+        lb += "[t=" + divTime + ", mu=" + mut_rate + "]"
         if not node.is_leaf():
-            node.label = lb            
+            node.label = lb
