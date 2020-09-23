@@ -62,20 +62,12 @@ def compute_tmin(tree):
 # MUST be called AFTER reset and mark_active
     for node in tree.preorder_node_iter():
         if node.time is not None: # this node is calibrated
-<<<<<<< HEAD
-            node.tmin = node.time + EPSILON_t
-        else:
-            node.tmin = None if node is tree.seed_node else node.parent_node.tmin
-            if node.tmin is not None:
-                node.tmin += EPSILON_t
-=======
             node.tmin = node.time
         elif node is tree.seed_node:
             node.tmin = compute_date_as_root(node)    
         else:
             #node.tmin = None if node is tree.seed_node else node.parent_node.tmin
             node.tmin = node.parent_node.tmin
->>>>>>> dbecdb95db1b85f639589fa4a7629486e62c93a7
 
 def reset(tree,sampling_time):
     init_calibrate(tree,sampling_time)

@@ -8,7 +8,6 @@ param = {
     'version': logdate.PROGRAM_VERSION,
     'description': logdate.PROGRAM_DESCRIPTION,
     'author': logdate.PROGRAM_AUTHOR,
-    'author_email': ['umai@eng.ucsd.edu'],
     'license': logdate.PROGRAM_LICENSE,
     'packages': find_packages(),
     'include_package_data': True,
