@@ -1,4 +1,4 @@
-* Version 1.0.1:
+* Version 1.0.2:
     * Use logging instead of print to show info and errors
     * Better initialization
     * Faster optimization by changing variables
