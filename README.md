@@ -20,6 +20,7 @@ Please submit questions and bug reports as [issues](https://github.com/uym2/wLog
 A Galaxy-based web server with graphical user interface is available at http://wlogdate.com/
 
 # Installation on your machine
+The current latest release is v1.0.1. 
 
 ## For Windows users
 We release executables for Windows users. The current stable release is v1.0.0, which can be [downloaded here](https://github.com/uym2/wLogDate/releases/download/v1.0.0/wldsetup-1.0.0.exe). Double click the exe file and follow the install wizard to setup wLogDate. 
