@@ -8,7 +8,7 @@ from tempfile import mkdtemp
 from shutil import copyfile, rmtree
 from os import remove
 from copy import deepcopy
-from logdate.fixed_init_lib import random_date_init
+from logdate.fixed_init_lib import random_date_init, preprocess
 from logdate.util_lib import date_to_days, days_to_date
 #from logdate.init_lib_old import random_date_init
 import platform
@@ -297,24 +297,18 @@ def setup_smpl_time(tree,sampling_time=None,bw_time=False,as_date=False,root_tim
         smpl_times[lb] = time        
     return smpl_times   
 
-'''    
-def random_timetree(tree,sampling_time,nrep,seed=None,root_age=None,leaf_age=None,min_nleaf=3,fout=stdout):
-    smpl_times = setup_smpl_time(tree,sampling_time=sampling_time,root_age=root_age,leaf_age=leaf_age)
+def random_timetree(tree,sampling_time,seed=None,root_time=0,leaf_time=1,min_nleaf=3,fout=stdout,bw_time=False,as_date=False):
+    smpl_times = setup_smpl_time(tree,sampling_time=sampling_time,bw_time=bw_time,as_date=as_date,root_time=root_time,leaf_time=leaf_time)    
+    #preprocess(tree,smpl_times)
+    X,seed,T0 = random_date_init(tree,smpl_times,1,min_nleaf=min_nleaf,seed=seed)
+    cons_eq,b = setup_constraint_changeVar(tree,smpl_times)
+     
+    #logger.info("Finished initialization with random seed " + str(seed))
     
-    for node in tree.preorder_node_iter():
-        if node.is_leaf():
-            node.fixed_age = smpl_times[node.taxon.label]
-        else:    
-            node.fixed_age = None
-    
-    setup_constraint(tree,smpl_times,root_age=root_age)
-    X,seed,_ = random_date_init(tree,smpl_times,nrep,min_nleaf=min_nleaf,rootAge=root_age,seed=seed)
-    logger.info("Finished initialization with random seed " + str(seed))
-    
-    for x in X:
-        s_tree,t_tree = scale_tree(tree,x)
-        fout.write(t_tree.as_string("newick"))
-'''    
+    x = X[0] + [T0[0]]
+    scale_tree(tree,x)
+    #compute_divergence_time(tree, smpl_times, x, bw_time=bw_time, as_date=as_date)
+    fout.write(tree.as_string("newick"))
 
 def logDate_with_random_init(tree,f_obj,sampling_time=None,bw_time=False,as_date=False,root_time=0,leaf_time=1,nrep=1,min_nleaf=3,maxIter=MAX_ITER,seed=None,pseudo=0,seqLen=1000,verbose=False):
     smpl_times = setup_smpl_time(tree,sampling_time=sampling_time,bw_time=bw_time,as_date=as_date,root_time=root_time,leaf_time=leaf_time)    
