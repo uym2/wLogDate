@@ -20,10 +20,10 @@ Please submit questions and bug reports as [issues](https://github.com/uym2/wLog
 A Galaxy-based web server with graphical user interface is available at http://wlogdate.com/
 
 # Installation on your machine
-The current latest release is v1.0.2. 
+The latest release is [v1.0.2](https://github.com/uym2/wLogDate/releases/tag/v1.0.2). 
 
 ## For Windows users
-We release executables for Windows users. The current stable release is v1.0.0, which can be [downloaded here](https://github.com/uym2/wLogDate/releases/download/v1.0.0/wldsetup-1.0.0.exe). Double click the exe file and follow the install wizard to setup wLogDate. 
+We release executables for Windows users. The current stable release is [v1.0.2](https://github.com/uym2/wLogDate/releases/tag/v1.0.2), which can be [downloaded here](https://github.com/uym2/wLogDate/releases/download/v1.0.2/wldsetup-1.0.2.exe). Double click the exe file and follow the install wizard to setup wLogDate. 
 After installation, restart your computer. Then open the cmd and run ```launch_wLogDate -h``` to see the commandline help of wLogDate.
 
 ## For MacOS and Linux users
@@ -35,6 +35,13 @@ You need to have:
 
 * Python >= 3.6
 * [Anaconda](https://www.anaconda.com/) would make the installation slightly easier. But [pip](https://pypi.org/project/pip/) (already installed with Python 3 >=3.4) would also work. 
+
+### Install using Pip
+wLogDate is available on the Python Package Index (PyPI). To install, use `pip` as follow
+
+``` bash
+   python3 -m pip install wlogdate 
+```
 
 ### Install using Conda
 First, add `bioconda` and `conda-forge` to your active channels.
@@ -49,13 +56,6 @@ Now use `conda install` to install wLogDate
 ``` bash
    conda install -c uym2 wlogdate 
 ```  
-
-### Install using Pip
-wLogDate is available on the Python Package Index (PyPI). To install, use `pip` as follow
-
-``` bash
-   python3 -m pip install wlogdate 
-```
 
 ### Install from source code
 1. Download the source code.  

@@ -1,3 +1,5 @@
+* Version 1.0.3:
+    * Relax 'keep_feasible' when initial point is infeasible
 * Version 1.0.2:
     * Use logging instead of print to show info and errors
     * Better initialization

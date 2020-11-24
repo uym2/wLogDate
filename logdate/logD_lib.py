@@ -226,12 +226,12 @@ def setup_constraint_old(tree,smpl_times):
     
     return cons_eq,b
 
-def logIt(tree,f_obj,cons_eq,b,x0=None,maxIter=MAX_ITER,pseudo=0,seqLen=1000,verbose=False):
+def logIt(tree,f_obj,cons_eq,b,x0=None,maxIter=MAX_ITER,pseudo=0,seqLen=1000,verbose=False,keep_feasible=True):
     N = len([node for node in tree.postorder_node_iter() if node.is_active])-1
-    bounds = Bounds(np.array([MIN_NU]*N+[MIN_MU]+[-np.inf]),np.array([np.inf]*(N+2)),keep_feasible=True)
+    bounds = Bounds(np.array([MIN_NU]*N+[MIN_MU]+[-np.inf]),np.array([np.inf]*(N+2)),keep_feasible=keep_feasible)
     x_init = x0
     args = (b)
-    linear_constraint = LinearConstraint(csr_matrix(cons_eq),[0]*len(cons_eq),[0]*len(cons_eq),keep_feasible=True)
+    linear_constraint = LinearConstraint(csr_matrix(cons_eq),[0]*len(cons_eq),[0]*len(cons_eq),keep_feasible=keep_feasible)
     f,g,h = f_obj(pseudo=pseudo,seqLen=seqLen)
     
     logger.info("Initial state:" )
@@ -327,7 +327,16 @@ def logDate_with_random_init(tree,f_obj,sampling_time=None,bw_time=False,as_date
         x0 = y[0] + [y[1]]
         #z0 = [x_i*sqrt(b_i) for (x_i,b_i) in zip(x0[:-2],b)] + [x0[-2],x0[-1]]
         z0 = [x_i*b_i for (x_i,b_i) in zip(x0[:-2],b)] + [x0[-2],x0[-1]]
-        _,f,z = logIt(tree,f_obj,cons_eq,b,x0=z0,maxIter=maxIter,pseudo=pseudo,seqLen=seqLen,verbose=verbose)
+        try:
+            _,f,z = logIt(tree,f_obj,cons_eq,b,x0=z0,maxIter=maxIter,pseudo=pseudo,seqLen=seqLen,verbose=verbose,keep_feasible=True)
+        except:
+            logger.warning("Initial point " + str(i+1) + " is infeasible. Retrying optimization without 'keep_feasible' flag ...")   
+            try:
+                _,f,z = logIt(tree,f_obj,cons_eq,b,x0=z0,maxIter=maxIter,pseudo=pseudo,seqLen=seqLen,verbose=verbose,keep_feasible=False)
+            except:
+                logger.warning("Couldn't find local optimal for Initial point " + str(i+1) + ". Skip now to the next initial point") 
+                continue   
+
         logger.info("Found local optimal for Initial point " + str(i+1))
         n_succeed += 1                
         
