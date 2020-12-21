@@ -54,7 +54,7 @@ First, add `bioconda` and `conda-forge` to your active channels.
 Now use `conda install` to install wLogDate
 
 ``` bash
-   conda install -c uym2 wlogdate 
+   conda install wlogdate 
 ```  
 
 ### Install from source code
