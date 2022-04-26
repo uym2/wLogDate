@@ -22,7 +22,6 @@ def main():
     parser.add_argument("-o","--output",required=True,help="Output trees")
     parser.add_argument("-V","--verbose",action='store_true',help="Show verbose message. Default: NO")
     parser.add_argument("-v","--version", action='version', version=logdate.PROGRAM_NAME + " " + logdate.PROGRAM_VERSION,help="Show wLogDate version and exit")
-    parser.add_argument("-k","--keeplabel",action='store_true',help="Suppress auto label assignment to internal nodes. WARNING: LogDate uses the labels to identify calibration points / sampling times. Use this option only if your tree has UNIQUE LABELING FOR ALL nodes. Default: NO")
     parser.add_argument("-p","--rep",required=False,help="The number of random replicates for initialization. Default: use 1 initial point")
     parser.add_argument("-s","--rseed",required=False,help="Random seed to generate starting tree initial points")
     parser.add_argument("-l","--seqLen",required=False,help="The length of the sequences. Default: 1000")
@@ -58,7 +57,6 @@ def main():
 
     f_obj = f_wLogDate_changeVar
     verbose = args["verbose"]
-    do_label = not args["keeplabel"]
     bw_time = args["backward"]
     as_date = args["asDate"]
 
@@ -86,13 +84,6 @@ def main():
 
     for treestr in tree_strings:  
         tree = Tree.get(data=treestr,schema='newick',preserve_underscores=True)
-        # labeling
-        if do_label:
-            nodeIdx = 0
-            for node in tree.preorder_node_iter():
-                if not node.is_leaf():
-                    node.label = "I" + str(nodeIdx)
-                    nodeIdx += 1
         # handle zero-length branches
         for node in tree.preorder_node_iter():            
             if node is not tree.seed_node:

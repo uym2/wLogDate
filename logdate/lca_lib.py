@@ -36,7 +36,6 @@ def find_LCAs(myTree,myQueries):
             return next_idx    
         __traverse__(myTree.seed_node,0,1)
         return E,F,H
-    
     def min_segment_tree(E,H):
     # build a min segment-tree
     # to query the minimum of any range of H

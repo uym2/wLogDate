@@ -22,7 +22,7 @@ from logdate.lca_lib import find_LCAs
 import logging
 
 MAX_ITER = 50000
-MIN_NU = 1e-18
+MIN_NU = 1e-12
 MIN_MU = 1e-5
 EPSILON_t = 1e-4
 
@@ -249,13 +249,15 @@ def logIt(tree,f_obj,cons_eq,b,x0=None,maxIter=MAX_ITER,pseudo=0,seqLen=1000,ver
 
 def setup_smpl_time(tree,sampling_time=None,bw_time=False,as_date=False,root_time=0,leaf_time=1):
 # Note: if as_date is True, bw_time will be ignored 
+    # if the root is not labeled, give it the label "autoLabel0"
+    if tree.seed_node.label is None:
+        tree.seed_node.label = "autoLabel0"
     smpl_times = {}   
     if root_time is not None: 
         smpl_times[tree.seed_node.label] = root_time if not bw_time else -root_time
     if leaf_time is not None:    
         for node in tree.leaf_nodes():
             smpl_times[node.taxon.label] = leaf_time if not bw_time else -leaf_time
-    
     # case 1: no sampling time given --> return the smpl_times defined by root_time and leaf_time
     if not sampling_time:
         return smpl_times
@@ -282,7 +284,8 @@ def setup_smpl_time(tree,sampling_time=None,bw_time=False,as_date=False,root_tim
             times.append(t)
             names.append(name)
     calibs = find_LCAs(tree,queries) 
-    nodeIdx = 0
+    calibID = 1
+    ndigits = len(str(len(calibs)))
     for node,time,name in zip(calibs,times,names):
         if node is None:
             continue
@@ -293,7 +296,14 @@ def setup_smpl_time(tree,sampling_time=None,bw_time=False,as_date=False,root_tim
                 node.label = name
             lb = name
         else:
-            lb = node.taxon.label if node.is_leaf() else node.label            
+            if node.is_leaf():
+                lb = node.taxon.label
+            elif node.label is None:
+                lb = "autoLabel" + str(calibID).rjust(ndigits,'0')
+                node.label = lb
+                calibID += 1
+            else:
+                lb = node.label    
         smpl_times[lb] = time        
     return smpl_times   
 
@@ -326,7 +336,7 @@ def logDate_with_random_init(tree,f_obj,sampling_time=None,bw_time=False,as_date
     for i,y in enumerate(zip(X,T0)):
         x0 = y[0] + [y[1]]
         #z0 = [x_i*sqrt(b_i) for (x_i,b_i) in zip(x0[:-2],b)] + [x0[-2],x0[-1]]
-        z0 = [x_i*b_i for (x_i,b_i) in zip(x0[:-2],b)] + [x0[-2],x0[-1]]
+        z0 = [max(x_i*b_i,2*MIN_NU) for (x_i,b_i) in zip(x0[:-2],b)] + [x0[-2],x0[-1]]
         try:
             _,f,z = logIt(tree,f_obj,cons_eq,b,x0=z0,maxIter=maxIter,pseudo=pseudo,seqLen=seqLen,verbose=verbose,keep_feasible=True)
         except:
@@ -344,6 +354,8 @@ def logDate_with_random_init(tree,f_obj,sampling_time=None,bw_time=False,as_date
             f_min = f
             #x_best = [z_i/sqrt(b_i) for (z_i,b_i) in zip(z[:-2],b)] + [z[-2],z[-1]]
             x_best = [z_i/b_i for (z_i,b_i) in zip(z[:-2],b)] + [z[-2],z[-1]]
+            #logger.info(z)
+            #logger.info(x_best)
             logger.info("Found a better log-scored configuration")
             logger.info("New mutation rate: " + str(x_best[-2]))
             logger.info("New log score: " + str(f_min))
@@ -518,6 +530,8 @@ def scale_tree(tree,x):
         if node is not tree.seed_node:
             nu = x[node.idx] if node.is_active else 1.0
             node.edge_length *= nu/mu
+        else:
+            node.edge_length = None    
 
     
 def compute_divergence_time(tree,sampling_time,x,bw_time=False,as_date=False):
@@ -578,6 +592,8 @@ def compute_divergence_time(tree,sampling_time,x,bw_time=False,as_date=False):
             mut_rate = str(node.mutation_rate)
         else:
             mut_rate = str(mu)
-        lb += "[t=" + divTime + ", mu=" + mut_rate + "]"
+        if lb is None:
+            lb = ''
+        lb += "[t=" + divTime + ",mu=" + mut_rate + "]"
         if not node.is_leaf():
             node.label = lb
